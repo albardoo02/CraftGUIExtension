@@ -1,0 +1,211 @@
+# GUIに登録するアイテム一覧
+Items:
+  page1:
+    0:
+      enabled: true
+      isMythicItem: false
+      material: 'gold_nugget'
+      displayName: 'なげっと'
+      Lore: 'CommonLore'
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: "&bダイヤモンドブロック"
+    1:
+      enabled: true
+      isMythicItem: true
+      material: 'gold_ingot'
+      displayName: ''
+      Lore: 'CommonLore'
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: "&bダイヤモンドブロック"
+    2:
+      enabled: true
+      isMythicItem: false
+      material: 'gold_block'
+      displayName: ''
+      lore: 'need9'
+      enchanted: true
+      requiredAmount: 9
+      giveMythicItemID: Compressed_gold_block
+      giveMythicItemdisplayName: '&e&l圧縮金ブロック'
+    3:
+      enabled: true
+      isMythicItem: true
+      material: 'gold_block'
+      displayName: '&e&l圧縮金ブロック'
+      lore: 'need9'
+      enchanted: true
+      requiredAmount: 9
+      giveMythicItemID: Narikin_Block
+      giveMythicItemdisplayName: '&6&l＄&e&l成金ブロック&6&l＄'
+    9:
+      enabled: true
+      isMythicItem: false
+      material: 'lapis_lazuli'
+      displayName: 'ラピスラズリ'
+      lore: 'CommonLore'
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemDisplayName: 'ダイヤモンドブロック'
+    10:
+      enabled: true
+      isMythicMobsItem: false
+      material: 'lapis_block'
+      displayName: 'ラピスラズリブロック'
+      lore: 'CommonLore'
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    11:
+      enabled: true
+      isMythicMobsItem: true
+      material: 'lapis_block'
+      displayName: '圧縮ラピスラズリブロック'
+      lore: 'CommonLore'
+      enchanted: true
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    12:
+      enabled: true
+      isMythicItem: true
+      material: 'tube_coral_block'
+      displayName: 'アオキなんちゃら'
+      lore: 'CommonLore'
+      enchanted: true
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    18:
+      enabled: true
+      isMythicItem: false
+      material: 'redstone'
+      displayName: 'レッドストーン'
+      lore: 'CommonLore'
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    19:
+      enabled: true
+      isMythicItem: false
+      material: 'redstone_block'
+      displayName: 'レッドストーンブロック'
+      lore: CommonLore
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    20:
+      enabled: true
+      isMythicItem: true
+      material: 'redstone_block'
+      displayName: '圧縮レッドストーン'
+      lore: 'CommonLore'
+      enchanted: true
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    21:
+      enabled: true
+      isMythicItem: true
+      material: 'fire_coral_block'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: true
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    27:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 1
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    28:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 2
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    29:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 3
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    30:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 4
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    31:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 5
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    32:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 6
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+    33:
+      enabled: true
+      isMythicItem: true
+      material: 'iron_pickaxe'
+      displayName: 'あかきなんちゃら'
+      lore: 'CommonLore'
+      enchanted: false
+      model: 7
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+  page2:
+    1:
+      enabled: true
+      isMythicItem: true
+      material: 'stick'
+      displayName: '&aデバッグ'
+      lore: 'CommonLore'
+      requiredAmount: 9
+      giveMythicItemID: diamond_block
+      giveMythicItemdisplayName: 'ダイヤモンドブロック'
+
+Lores:
+  CommonLore:
+    - '&f1行目'
+    - '&f2行目'
+  need9:
+    - '&f圧縮に必要な数: &a9'

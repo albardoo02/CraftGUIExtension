@@ -1,0 +1,16 @@
+name: CraftGuiExtension
+version: '${project.version}'
+main: net.azisaba.life.CraftGUIExtension
+api-version: '1.15'
+authors: [albardoo02]
+description: Editable CraftGUI
+website: https://github.com/albardoo02/CraftGUIExtension
+commands:
+  craftguiextension:
+    aliases:
+      - cge
+  ragui:
+    aliases:
+      - compress
+      - assyuku
+      - rgui
