@@ -58,25 +58,15 @@ Items:
           type: DIAMOND_BLOCK
           displayName: '&fダイヤモンドブロック'
           amount: 64
-    1:
-      enabled: true
-      isMythicItem: true
-      material: 'DIAMOND_PICKAXE'
-      displayName: '&b&lすごいぴっける'
-      lore: 'need9'
-      model: 1
-      requiredAmount: 9
-      giveMythicItemID: custom_pickaxe
-  page2:
-    0:
-      enabled: true
-      isMythicItem: true
-      material: 'DIAMOND_PICKAXE'
-      displayName: '&c&lすごいぴっける2'
-      lore: 'need9'
-      model: 1
-      requiredAmount: 9
-      giveMythicItemID: custom_pickaxe
+      resultItems:
+        - isMythicItem: true
+          mmid: '2025_GW_event_items_GWチケット'
+          displayName: '&6&lGW&e&lチケット'
+          amount: 16
+        - isMythicItem: false
+          type: GOLD_INGOT
+          displayName: '&f金インゴット'
+          amount: 16
 
 Lores:
   # Loreの設定名
