@@ -8,17 +8,15 @@ public class MapUtil {
 
     private final Map<UUID, Integer> playerPages = new HashMap<>();
 
-    public int getPlayerPage(UUID player) {
-        return playerPages.getOrDefault(player, 1);
+    public int getPlayerPage(UUID uuid) {
+        return playerPages.getOrDefault(uuid, 1);
     }
 
-    public void setPlayerPage(UUID player, int page) {
-        playerPages.put(player, page);
+    public void setPlayerPage(UUID uuid, int page) {
+        playerPages.put(uuid, page);
     }
 
-    public void removePlayerPage(UUID player) {
-        playerPages.remove(player);
+    public void removePlayerPage(UUID uuid) {
+        playerPages.remove(uuid);
     }
-
-
 }

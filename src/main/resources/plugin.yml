@@ -6,11 +6,14 @@ authors: [albardoo02]
 description: Editable CraftGUI
 website: https://github.com/albardoo02/CraftGUIExtension
 commands:
-  craftguiextension:
+  raggui:
     aliases:
-      - cge
-  ragui:
-    aliases:
-      - compress
       - assyuku
+      - compress
+      - ragggui
+      - ragguui
+      - ragui
+      - raguiyan
+      - ragunarok
       - rgui
+      - ragusugi
