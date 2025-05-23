@@ -11,35 +11,40 @@ NMSを使用しているため、Minecraft Ver 1.15.2のみ使用可能です。
 ## Configの設定
 ```yaml
 # GUIに登録するアイテム一覧
+# カラーコードが使用可能です
 Items:
   # ページ番号
   page1:
-    # スロット番号(0～44まで)
+    # アイテムを配置するスロット番号(0～44まで)
     0:
       # 圧縮可能にするかどうか
-      # true:有効, false:無効
       enabled: true
-      # MythicMobsアイテムかどうか
-      # true:MythicMobsアイテム, false:バニラアイテム
-      isMythicItem: false
       # アイテムID
-      material: 'STONE'
+      material: STONE
       # アイテムの表示名
-      # isMythicItemをtrueにするとdisplayNameが表示名になります
-      # isMythicitemがfalseであればmaterialが表示名になります(今後日本語対応可予定)
-      displayName: ''
-      # 以下のLoresで設定したLore名を記述
+      displayName: 'スポンジ'
+      # 以下のLoresで設定したLore名を設定してください
       lore: 'CommonLore'
       # エンチャントをするかどうか
-      # true:有効, false:無効
       enchant: false
       # Model番号を指定する場合に記載
       # デフォルトは0です
       model: 0
-      # 圧縮に必要なアイテム数
-      requiredAmount: 64
-      # 圧縮後に付与するMythicMobsのアイテムID
-      giveMythicItemID: 'isi_ticket'
+      # アイテムの変換に必要なアイテムの設定
+      requiredItems:
+        # MythicMobsアイテムかどうか
+        - isMythic: true
+          # 変換に必要なアイテムIDの設定
+          # バニラアイテムはtype，MMアイテムはmmidで設定して下さい．
+          mmid: '2025_GW_event_items_GWショベル10S'
+          # アイテムの表示名
+          displayName: '&6GWショベル'
+          # アイテムの最小必要数
+          amount: 1
+        - isMythic: false
+          type: DIAMOND_BLOCK
+          displayName: '&fダイヤモンドブロック'
+          amount: 64
     1:
       enabled: true
       isMythicItem: true
@@ -61,6 +66,7 @@ Items:
       giveMythicItemID: custom_pickaxe
 
 Lores:
+  # Loreの設定名
   CommonLore:
     - '&f1行目'
     - '&f2行目'
@@ -69,9 +75,7 @@ Lores:
 ```
 
 ## 使い方
-- `/ragui`：GUIを開きます
-
-- `/cge reload`：Configを再読み込みします
+- `/raggui`：CraftGUI Extensionを開きます
 
 ## ライセンス / License
 [GNU General Public License v3.0](LICENSE)
