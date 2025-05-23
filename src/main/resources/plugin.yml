@@ -5,6 +5,8 @@ api-version: '1.15'
 authors: [albardoo02]
 description: Editable CraftGUI
 website: https://github.com/albardoo02/CraftGUIExtension
+softdepend:
+  - StorageBox
 commands:
   raggui:
     aliases:

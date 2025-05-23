@@ -9,15 +9,6 @@ Items:
       lore: 'CommonLore'
       enchanted: true
       model: 0
-      resultItems:
-        - isMythicItem: true
-          mmid: '2025_GW_event_items_GWチケット'
-          displayName: '&6&lGW&e&lチケット'
-          amount: 16
-        - isMythicItem: false
-          type: GOLD_INGOT
-          displayName: '&f金インゴット'
-          amount: 16
       requiredItems:
         - isMythicItem: true
           mmid: '2025_GW_event_items_GWショベル10S'
@@ -27,6 +18,15 @@ Items:
           type: DIAMOND_BLOCK
           displayName: '&fダイヤモンドブロック'
           amount: 64
+      resultItems:
+        - isMythicItem: true
+          mmid: '2025_GW_event_items_GWチケット'
+          displayName: '&6&lGW&e&lチケット'
+          amount: 16
+        - isMythicItem: false
+          type: GOLD_INGOT
+          displayName: '&f金インゴット'
+          amount: 16
     1:
       enabled: true
       material: SPONGE
@@ -34,15 +34,10 @@ Items:
       lore: 'CommonLore'
       enchanted: false
       model: 0
-      resultItems:
-        - isMythicItem: false
-          type: SPONGE
-          displayName: '&fスポンジ'
-          amount: 1
       requiredItems:
-        - isMythicItem: true
-          mmid: "2025_GW_event_items_GWチケット"
-          displayName: '&6&lGW&e&lチケット'
+        - isMythicItem: false
+          type: YELLOW_DYE
+          displayName: '&e黄色の染料'
           amount: 4
         - isMythicItem: false
           type: GRAVEL
@@ -55,6 +50,11 @@ Items:
         - isMythicItem: false
           type: HAY_BLOCK
           displayName: '&f俵'
+          amount: 1
+      resultItems:
+        - isMythicItem: false
+          type: SPONGE
+          displayName: '&fスポンジ'
           amount: 1
 
 

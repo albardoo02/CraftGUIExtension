@@ -1,20 +1,20 @@
 package net.azisaba.life.listener;
 
-import net.azisaba.itemstash.ItemStash;
 import net.azisaba.life.CraftGUIExtension;
 import net.azisaba.life.gui.GuiManager;
 import net.azisaba.life.utils.GuiUtil;
+import net.azisaba.life.utils.ItemUtil;
 import net.azisaba.life.utils.MapUtil;
+import net.azisaba.life.utils.RequiredOrResultItem;
 import org.bukkit.*;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,114 +24,141 @@ public class GuiClickListener implements Listener {
     private final MapUtil mapUtil;
     private final GuiManager guiManager;
     private final GuiUtil guiUtil;
+    private final Map<String, Map<Integer, ItemUtil>> loadedItems;
+    private final Map<String, List<String>> loadedLores;
 
-    public GuiClickListener(CraftGUIExtension plugin, MapUtil mapUtil, GuiManager guiManager, GuiUtil guiUtil) {
+
+    public GuiClickListener(CraftGUIExtension plugin, MapUtil mapUtil, GuiManager guiManager, GuiUtil guiUtil, Map<String, Map<Integer, ItemUtil>> loadedItems, Map<String, List<String>> loadedLores) {
         this.plugin = plugin;
         this.mapUtil = mapUtil;
         this.guiManager = guiManager;
         this.guiUtil = guiUtil;
+        this.loadedItems = loadedItems;
+        this.loadedLores = loadedLores;
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player) {
-            Player player = (Player) event.getWhoClicked();
-            Inventory gui = event.getClickedInventory();
-            ItemStack clicked = event.getCurrentItem();
-            Location location = player.getLocation();
-            int currentPage = this.mapUtil.getPlayerPage(player.getUniqueId());
-            int slot = event.getRawSlot();
-            if (gui != null && event.getView().getTitle().contains("CraftGUI Extension")) {
-                event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+        Player player = (Player) event.getWhoClicked();
+        Inventory clickedInventory = event.getClickedInventory();
+        ItemStack clickedItem = event.getCurrentItem();
+        Location location = player.getLocation();
+        int currentPage = this.mapUtil.getPlayerPage(player.getUniqueId());
+        int slot = event.getRawSlot();
+        ClickType clickType = event.getClick();
 
-                if (slot >= 45 && slot <= 53) {
-                    handleNavigationAndCloseButton(player, location, slot, clicked);
-                    return;
+        if (clickedInventory == null || !event.getView().getTitle().contains("CraftGUI Extension")) {
+            return;
+        }
+        event.setCancelled(true);
+
+        if (slot >= 45 && slot <= 53) {
+            handleNavigationAndCloseButton(player, location, slot, clickedItem);
+            return;
+        }
+
+        Map<Integer, ItemUtil> pageItems = loadedItems.get("page" + currentPage);
+        if (pageItems == null) {
+            player.sendMessage(ChatColor.RED + "エラー: ページ" + currentPage + "のデータが見つかりません．");
+            return;
+        }
+
+        ItemUtil clickedItemUtil = pageItems.get(slot);
+        if (clickedItemUtil == null || !clickedItemUtil.isEnabled()) {
+            return;
+        }
+
+        List<RequiredOrResultItem> requiredItems = clickedItemUtil.getRequiredItems();
+        if (requiredItems == null || requiredItems.isEmpty()) {
+            player.sendMessage(ChatColor.RED + "エラー: このアイテムには必要な素材が設定されていません．");
+            return;
+        }
+
+        int maxCraftableAmount = getMaxCraftableAmount(player, requiredItems);
+
+        if (maxCraftableAmount == 0) {
+            player.sendMessage(ChatColor.RED + "必要素材が不足しています．");
+            player.playSound(location, Sound.ENTITY_VILLAGER_NO, 2, 1);
+            return;
+        }
+
+        int craftAmount = 0;
+        if (clickType == ClickType.LEFT) {
+            craftAmount = 1;
+        } else if (clickType == ClickType.RIGHT) {
+            craftAmount = maxCraftableAmount;
+        }
+
+        if (craftAmount > maxCraftableAmount) {
+            craftAmount = maxCraftableAmount;
+        }
+
+        if (craftAmount == 0) {
+            return;
+        }
+
+        boolean hasEnoughSpace = true;
+        for (RequiredOrResultItem resultItem : clickedItemUtil.getResultItems()) {
+            if (resultItem.getType() != null && resultItem.getType() != Material.AIR) { // バニラアイテムの場合
+                if (player.getInventory().firstEmpty() == -1 && resultItem.getAmount() * craftAmount > 0) {
+                    hasEnoughSpace = false;
+                    break;
                 }
+            }
+        }
 
-                ConfigurationSection pageSection = this.plugin.getConfig().getConfigurationSection("Items.page" + currentPage);
-                if (pageSection != null) {
-                    ConfigurationSection slotSection = pageSection.getConfigurationSection("" + slot);
-                    if (slotSection != null) {
-                        if (slotSection.getBoolean("enabled")) {
-                            List<Map<?, ?>> requiredList = slotSection.getMapList("requiredItems");
-                            Map<Integer, Integer> haveCounts = new HashMap<>();
-                            boolean canCompress = true;
+        if (!hasEnoughSpace) {
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 2, 1);
+            player.sendMessage(ChatColor.GOLD + "インベントリに空きがないので変換できませんでした");
+            player.closeInventory();
+            return;
+        }
 
-                            for (int i = 0; i < requiredList.size(); ++i) {
-                                Map<?, ?> map = requiredList.get(i);
-                                boolean isMythic = Boolean.TRUE.equals(map.get("isMythicItem"));
-                                Object rawAmount = map.get("amount");
-                                if (rawAmount == null) {
-                                    rawAmount = map.get("amount");
-                                }
+        consumeRequiredItems(player, requiredItems, craftAmount);
+        guiUtil.giveResultItems(player, clickedItemUtil.getResultItems(), craftAmount);
 
-                                int need = rawAmount instanceof Number ? ((Number) rawAmount).intValue() : 1;
-                                int amount;
+        player.playSound(location, Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+        player.sendMessage(ChatColor.GREEN + "アイテムを" + craftAmount + "回変換しました");
 
-                                if (isMythic) {
-                                    String mmid = map.get("mmid").toString();
-                                    amount = this.guiUtil.countMythic(player, mmid);
-                                } else {
-                                    String type = map.get("type").toString();
-                                    amount = this.guiUtil.countVanilla(player, Material.getMaterial(type));
-                                }
+        guiManager.openCraftGUI(player, currentPage);
+    }
 
-                                haveCounts.put(i, amount);
-                                if (amount < need) {
-                                    canCompress = false;
-                                }
-                            }
+    private int getMaxCraftableAmount(Player player, List<RequiredOrResultItem> requiredItems) {
+        int maxCraftable = Integer.MAX_VALUE;
 
-                            for (int i = 0; i < requiredList.size(); ++i) {
-                                Map<?, ?> map = requiredList.get(i);
-                                boolean isMythic = Boolean.TRUE.equals(map.get("isMythicItem"));
-                                String id = isMythic ? map.get("mmid").toString() : map.get("type").toString();
-                                Object rawAmount = map.get("amount");
-                                if (rawAmount == null) {
-                                    rawAmount = map.get("amount");
-                                }
+        for (RequiredOrResultItem requiredItem : requiredItems) {
+            String requiredDisplay = requiredItem.getDisplayName();
+            int amountNeededPerCraft = requiredItem.getAmount();
 
-                                int need = rawAmount instanceof Number ? ((Number) rawAmount).intValue() : 1;
-                                int amount = haveCounts.get(i);
+            if (amountNeededPerCraft <= 0) {
+                plugin.getLogger().warning("Required item " + requiredDisplay + " has amount <= 0. Skipping for craftability check.");
+                continue;
+            }
+            int playerAmount = 0;
+            if (requiredItem.isMythicItem()) {
+                playerAmount = guiUtil.countMythic(player, requiredItem.getMmid());
+            } else if (requiredItem.getType() != null) {
+                playerAmount = guiUtil.countVanilla(player, requiredItem.getType());
+            }
 
-                                String displayName;
-                                if (map.containsKey("displayName")) {
-                                    displayName = ChatColor.translateAlternateColorCodes('&', map.get("displayName").toString());
-                                } else {
-                                    displayName = id;
-                                }
-                                player.sendMessage(
-                                        (isMythic ? "§7[§bMMID§7] " : "§7[§aVanilla§7] ") + "§b" + displayName + "§7 : " + (amount >= need ? "§a" : "§c") + amount + " §7/ §a" + need
-                                );
-                            }
+            int craftableByThisItem = playerAmount / amountNeededPerCraft;
+            if (craftableByThisItem < maxCraftable) {
+                maxCraftable = craftableByThisItem;
+            }
+        }
+        return maxCraftable;
+    }
 
-                            if (canCompress) {
-                                Inventory inv = player.getInventory();
-                                if (inv.firstEmpty() == -1) {
-                                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 2, 1);
-                                    player.sendMessage(ChatColor.GOLD + "インベントリに空きがないので変換できませんでした");
-                                    player.closeInventory();
-                                } else {
-                                    for (Map<?, ?> map : requiredList) {
-                                        boolean isMythic = Boolean.TRUE.equals(map.get("isMythicItem"));
-                                        String id = (String) map.get(isMythic ? "mmid" : "type");
-                                        Object rawAmount = map.get("amount");
-                                        if (rawAmount == null) {
-                                            rawAmount = map.get("amount");
-                                        }
-                                        int need = rawAmount instanceof Number ? ((Number) rawAmount).intValue() : 1;
-                                        this.guiUtil.removeItems(player, isMythic, id, need);
-                                    }
-                                    this.guiUtil.giveResultItems(player, slotSection);
-                                }
-                            } else {
-                                player.sendMessage(ChatColor.RED + "必要数が不足しています！");
-                                player.playSound(location, Sound.ENTITY_VILLAGER_NO, 2, 1);
-                            }
-                        }
-                    }
-                }
+    private void consumeRequiredItems(Player player, List<RequiredOrResultItem> requiredItems, int craftAmount) {
+        for (RequiredOrResultItem requiredItem : requiredItems) {
+            int totalAmountToConsume = requiredItem.getAmount() * craftAmount;
+            if (requiredItem.isMythicItem()) {
+                guiUtil.removeMythic(player, requiredItem.getMmid(), totalAmountToConsume);
+            } else if (requiredItem.getType() != null) {
+                guiUtil.removeVanilla(player, requiredItem.getType(), totalAmountToConsume);
             }
         }
     }

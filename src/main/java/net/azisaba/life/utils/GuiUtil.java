@@ -7,32 +7,34 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GuiUtil{
 
     private final CraftGUIExtension plugin;
+    private Map<String, Map<Integer, ItemUtil>> loadedItems;
 
-    public GuiUtil(CraftGUIExtension plugin) {
+    public GuiUtil(CraftGUIExtension plugin, Map<String, Map<Integer, ItemUtil>> loadedItems) {
         this.plugin = plugin;
+        this.loadedItems = loadedItems;
     }
 
     public int getMaxPage() {
-        ConfigurationSection itemsRoot = plugin.getConfig().getConfigurationSection("Items");
         int max = 1;
-        if (itemsRoot != null) {
-            for (String key : itemsRoot.getKeys(false)) {
-                if (key.startsWith("page")) {
+        if (loadedItems != null && !loadedItems.isEmpty()) {
+            for (String pageKey : loadedItems.keySet()) {
+                if (pageKey.startsWith("page")) {
                     try {
-                        int num = Integer.parseInt(key.substring(4));
-                        max = Math.max(max, num);
-                    } catch (NumberFormatException ignored) {}
+                        int pageNum = Integer.parseInt(pageKey.substring(4));
+                        max = Math.max(max, pageNum);
+                    } catch (NumberFormatException e) {
+                        plugin.getLogger().warning("Invalid page key format in loadedItems: " + pageKey);
+                    }
                 }
             }
         }
@@ -44,7 +46,12 @@ public class GuiUtil{
     }
 
     public int countVanilla(Player player, Material mat) {
-        return countMatchingItems(player, stack -> stack.getType() == mat);
+        return countMatchingItems(player, stack -> {
+            ItemMeta meta = stack.getItemMeta();
+            boolean hasCustomName = meta != null && meta.hasDisplayName();
+
+            return stack.getType() == mat && !hasCustomName;
+        });
     }
 
     private int countMatchingItems(Player player, java.util.function.Predicate<ItemStack> predicate) {
@@ -57,13 +64,43 @@ public class GuiUtil{
         return count;
     }
 
-    public void removeItems(Player player, boolean isMythic, String idOrMaterial, int amount) {
+    public void removeMythic(Player player, String mmid, int amount) {
+        removeItemsInternal(player, true, mmid, amount);
+    }
+
+    public void removeVanilla(Player player, Material material, int amount) {
         PlayerInventory inv = player.getInventory();
         int remaining = amount;
 
         for (int i = 0; i < inv.getSize(); i++) {
             ItemStack item = inv.getItem(i);
-            if (item == null) continue;
+            if (item == null || item.getType() == Material.AIR) continue;
+
+            ItemMeta meta = item.getItemMeta();
+            boolean hasCustomName = meta != null && meta.hasDisplayName();
+
+            if (item.getType() == material && !hasCustomName) {
+                int stackAmount = item.getAmount();
+                if (stackAmount <= remaining) {
+                    inv.setItem(i, null);
+                    remaining -= stackAmount;
+                } else {
+                    item.setAmount(stackAmount - remaining);
+                    remaining = 0;
+                }
+            }
+
+            if (remaining <= 0) break;
+        }
+    }
+
+    private void removeItemsInternal(Player player, boolean isMythic, String idOrMaterial, int amount) {
+        PlayerInventory inv = player.getInventory();
+        int remaining = amount;
+
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType() == Material.AIR) continue;
 
             boolean matched = isMythic
                     ? idOrMaterial.equalsIgnoreCase(MythicItemUtil.getMythicType(item))
@@ -77,8 +114,7 @@ public class GuiUtil{
                 remaining -= stackAmount;
             } else {
                 item.setAmount(stackAmount - remaining);
-                inv.setItem(i, item);
-                break;
+                remaining = 0;
             }
 
             if (remaining <= 0) break;
@@ -90,36 +126,37 @@ public class GuiUtil{
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
-    public void giveResultItems(Player player, ConfigurationSection slotSection) {
-        List<Map<?, ?>> resultItems = slotSection.getMapList("resultItems");
+    public void giveMythic(Player player, String mmid, int amount) {
+        giveMythicItem(player, mmid, amount);
+    }
 
-        for (Map<?, ?> result : resultItems) {
-            boolean isMythic = Boolean.TRUE.equals(result.get("isMythicItem"));
-            Object rawAmount = result.get("amount");
-            int amount = (rawAmount instanceof Number) ? ((Number) rawAmount).intValue() : 1;
+    public void giveVanilla(Player player, Material material, String displayName, int amount) {
+        ItemStack item = new ItemStack(material, amount);
+        if (displayName != null && !displayName.isEmpty()) {
+            item.getItemMeta().setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
+        }
+        player.getInventory().addItem(item);
+    }
 
-            String displayName = result.containsKey("displayName")
-                    ? ChatColor.translateAlternateColorCodes('&', result.get("displayName").toString())
-                    : isMythic ? result.get("mmid").toString() : result.get("type").toString();
+    public void giveResultItems(Player player, List<RequiredOrResultItem> resultItems, int craftAmount) {
+        for (RequiredOrResultItem result : resultItems) {
+            int totalAmount = result.getAmount() * craftAmount;
 
-            if (isMythic) {
-                String mmid = (String) result.get("mmid");
-                if (mmid != null) {
-                    giveMythicItem(player, mmid, amount);
-                    player.sendMessage("§7[§bMMID§7] §a" + displayName + "を" + amount + "個付与しました");
+            String displayName = result.getDisplayName();
+
+            if (result.isMythicItem()) {
+                if (result.getMmid() != null) {
+                    giveMythic(player, result.getMmid(), totalAmount);
+                    player.sendMessage("§7[§bMMID§7] §a" + displayName + ChatColor.WHITE +"を" + totalAmount + "個付与しました");
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0F, 1.0F);
                 }
             } else {
-                String type = (String) result.get("type");
-                Material material = Material.matchMaterial(type.toUpperCase());
-                if (material == null) {
-                    player.sendMessage(ChatColor.RED + type + "は存在しないアイテムです");
-                    return;
+                if (result.getType() == null) {
+                    player.sendMessage(ChatColor.RED + "エラー: アイテムIDが設定されていないバニラアイテムです．");
+                    continue;
                 }
-
-                ItemStack item = new ItemStack(material, amount);
-                player.getInventory().addItem(item);
-                player.sendMessage("§7[§aVanilla§7] §a" + displayName + "を" + amount + "個付与しました");
+                giveVanilla(player, result.getType(), displayName, totalAmount);
+                player.sendMessage("§7[§aVanilla§7] " + ChatColor.AQUA + displayName + ChatColor.WHITE + "を" + totalAmount + "個付与しました");
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0F, 1.0F);
             }
         }
