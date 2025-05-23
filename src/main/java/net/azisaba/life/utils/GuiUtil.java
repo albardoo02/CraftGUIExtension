@@ -90,43 +90,6 @@ public class GuiUtil{
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
-    /*
-    public void giveResultItems(Player player, ConfigurationSection slotSection) {
-        List<Map<?, ?>> resultItems = slotSection.getMapList("resultItems");
-
-        for (Map<?, ?> result : resultItems) {
-            boolean isMythic = Boolean.TRUE.equals(result.get("isMythicItem"));
-            Object rawAmount = result.get("amount");
-            if (rawAmount == null) rawAmount = result.get("amount");
-            int amount = (rawAmount instanceof Number) ? ((Number) rawAmount).intValue() : 1;
-
-            if (isMythic) {
-                String mmid = (String) result.get("mmid");
-                if (mmid != null) {
-                    giveMythicItem(player, mmid, amount);
-                }
-            } else {
-                String type = (String) result.get("type");
-                if (type != null) {
-                    Material material = Material.matchMaterial(type.toUpperCase());
-                    if (material == null) {
-                        player.sendMessage(ChatColor.RED + type + "は存在しないアイテムです");
-                        return;
-                    }
-
-                    if (player.getInventory().firstEmpty() == -1) {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7[&aVanilla&7] §cインベントリに空きがありません"));
-                        return;
-                    }
-
-                    ItemStack item = new ItemStack(material, amount);
-                    player.getInventory().addItem(item);
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&aVanilla&7] §a" + type + "を" + amount + "個付与しました"));
-                }
-            }
-        }
-    }
-     */
     public void giveResultItems(Player player, ConfigurationSection slotSection) {
         List<Map<?, ?>> resultItems = slotSection.getMapList("resultItems");
 

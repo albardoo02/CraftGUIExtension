@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class GuiManager {
 
@@ -58,19 +59,60 @@ public class GuiManager {
                                     if (loreKey != null && this.plugin.getConfig().contains("Lores." + loreKey)) {
                                         List<String> lore = this.plugin.getConfig().getStringList("Lores." + loreKey);
                                         List<String> coloredLore = new ArrayList<>();
-
-                                        for(String line : lore) {
+                                        for (String line : lore) {
                                             coloredLore.add(ChatColor.translateAlternateColorCodes('&', line));
                                         }
 
+                                        List<String> requirementLore = null;
+                                        if (itemData.contains("requiredItems")) {
+                                            requirementLore = new ArrayList<>();
+                                            requirementLore.add(ChatColor.GRAY + "必要素材:");
+
+                                            List<?> requiredItems = itemData.getList("requiredItems");
+                                            if (requiredItems != null) {
+                                                for (Object obj : requiredItems) {
+                                                    if (obj instanceof Map) {
+                                                        @SuppressWarnings("unchecked")
+                                                        Map<String, Object> requiredItemMap = (Map<String, Object>) obj;
+
+                                                        boolean isMythic = (boolean) requiredItemMap.getOrDefault("isMythicItem", false);
+                                                        String requiredType = (String) requiredItemMap.getOrDefault("type", "UNKNOWN");
+                                                        String requiredDisplay = (String) requiredItemMap.getOrDefault("displayName", requiredType);
+                                                        int amount = (int) requiredItemMap.getOrDefault("amount", 1);
+
+                                                        int playerAmount = 0;
+                                                        if (isMythic) {
+                                                            playerAmount = guiUtil.countMythic(player, requiredType);
+                                                        } else {
+                                                            Material mat = Material.matchMaterial(requiredType.toUpperCase());
+                                                            if (mat != null) {
+                                                                playerAmount = guiUtil.countVanilla(player, mat);
+                                                            }
+                                                        }
+
+                                                        String title = playerAmount >= amount ? ChatColor.GREEN + "✓ " : ChatColor.RED + "✘ ";
+                                                        ChatColor color = playerAmount >= amount ? ChatColor.GREEN : ChatColor.RED;
+
+                                                        String hasItemMessage = getString(playerAmount, amount);
+
+                                                        requirementLore.add(title + ChatColor.translateAlternateColorCodes('&', requiredDisplay)
+                                                                + color + " x" + amount + hasItemMessage
+                                                                + (isMythic ? ChatColor.GRAY + " (Mythic)" : ChatColor.DARK_GRAY + " (Vanilla)"));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        coloredLore.addAll(requirementLore);
                                         meta.setLore(coloredLore);
                                     }
 
                                     boolean enchanted = itemData.getBoolean("enchanted");
                                     if (enchanted) {
                                         meta.addEnchant(Enchantment.DURABILITY, 1, true);
-                                        meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ENCHANTS});
+                                        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                                     }
+
+                                    meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 
                                     if (meta != null) {
                                         Integer model = itemData.getInt("model");
@@ -120,5 +162,17 @@ public class GuiManager {
             this.mapUtil.setPlayerPage(player.getUniqueId(), page);
             player.openInventory(inv);
         }
+    }
+
+    private static String getString(int playerAmount, int amount) {
+        String hasItemMessage = "";
+        if (playerAmount >= amount) {
+            hasItemMessage = ChatColor.AQUA + " (" + playerAmount + "個所持)";
+        } else if (playerAmount > 0) {
+            hasItemMessage = ChatColor.YELLOW + " (" + playerAmount + " / " + ChatColor.GREEN + amount + "個所持)";
+        } else {
+            hasItemMessage = ChatColor.RED + " (所持していません)";
+        }
+        return hasItemMessage;
     }
 }

@@ -30,7 +30,7 @@ Items:
     1:
       enabled: true
       material: SPONGE
-      displayName: '&eスポンジ'
+      displayName: '&eすっごいスポンジ&c(偽物)'
       lore: 'CommonLore'
       enchanted: false
       model: 0
@@ -40,9 +40,9 @@ Items:
           displayName: '&fスポンジ'
           amount: 1
       requiredItems:
-        - isMythicItem: false
-          type: YELLOW_DYE
-          displayName: '&f黄色の染料'
+        - isMythicItem: true
+          mmid: "2025_GW_event_items_GWチケット"
+          displayName: '&6&lGW&e&lチケット'
           amount: 4
         - isMythicItem: false
           type: GRAVEL
@@ -60,7 +60,8 @@ Items:
 
 Lores:
   CommonLore:
-    - '&f1行目'
-    - '&f2行目'
+    - '&f左クリックで1回変換します'
+    - '&f右クリっくで上限まで変換します'
+    - ''
   need9:
     - '&f圧縮に必要な数: &a9'
