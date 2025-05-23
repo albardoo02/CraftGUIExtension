@@ -56,3 +56,11 @@ Items:
           type: HAY_BLOCK
           displayName: '&f俵'
           amount: 1
+
+
+Lores:
+  CommonLore:
+    - '&f1行目'
+    - '&f2行目'
+  need9:
+    - '&f圧縮に必要な数: &a9'
