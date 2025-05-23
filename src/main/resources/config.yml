@@ -1,4 +1,4 @@
-configVersion: 1.1
+configVersion: 1.2
 
 Items:
   page1:
@@ -19,11 +19,11 @@ Items:
           displayName: '&f金インゴット'
           amount: 16
       requiredItems:
-        - isMythic: true
+        - isMythicItem: true
           mmid: '2025_GW_event_items_GWショベル10S'
           displayName: '&6GWショベル'
           amount: 1
-        - isMythic: false
+        - isMythicItem: false
           type: DIAMOND_BLOCK
           displayName: '&fダイヤモンドブロック'
           amount: 64
@@ -40,19 +40,19 @@ Items:
           displayName: '&fスポンジ'
           amount: 1
       requiredItems:
-        - isMythic: false
+        - isMythicItem: false
           type: YELLOW_DYE
           displayName: '&f黄色の染料'
           amount: 4
-        - isMythic: false
+        - isMythicItem: false
           type: GRAVEL
           displayName: '&f砂利'
           amount: 2
-        - isMythic: false
+        - isMythicItem: false
           type: SAND
           displayName: '&f砂'
           amount: 2
-        - isMythic: false
+        - isMythicItem: false
           type: HAY_BLOCK
           displayName: '&f俵'
           amount: 1

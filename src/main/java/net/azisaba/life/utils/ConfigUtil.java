@@ -25,7 +25,7 @@ public class ConfigUtil {
         if (!oldFolder.exists()) {
             oldFolder.mkdir();
         }
-        String oldFileName = "config-v" + plugin.getConfig().getString("configVersion", "1.0") + ".yml";
+        String oldFileName = "config-v" + plugin.getConfig().getString("configVersion", "0.0") + ".yml";
         Path oldPath = Paths.get(plugin.getDataFolder().getPath(), "oldConfig", oldFileName);
         try {
             Files.move(configFile.toPath(), oldPath, StandardCopyOption.REPLACE_EXISTING);

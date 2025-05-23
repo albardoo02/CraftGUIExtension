@@ -1,5 +1,6 @@
 package net.azisaba.life.listener;
 
+import net.azisaba.itemstash.ItemStash;
 import net.azisaba.life.CraftGUIExtension;
 import net.azisaba.life.gui.GuiManager;
 import net.azisaba.life.utils.GuiUtil;
@@ -34,14 +35,13 @@ public class GuiClickListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player) {
-            Player player = (Player)event.getWhoClicked();
-            Inventory inv = event.getClickedInventory();
+            Player player = (Player) event.getWhoClicked();
+            Inventory gui = event.getClickedInventory();
             ItemStack clicked = event.getCurrentItem();
-            Material material = clicked.getType();
             Location location = player.getLocation();
             int currentPage = this.mapUtil.getPlayerPage(player.getUniqueId());
             int slot = event.getRawSlot();
-            if (inv != null && event.getView().getTitle().contains("CraftGUI Extension")) {
+            if (gui != null && event.getView().getTitle().contains("CraftGUI Extension")) {
                 event.setCancelled(true);
 
                 if (slot >= 45 && slot <= 53) {
@@ -55,19 +55,20 @@ public class GuiClickListener implements Listener {
                     if (slotSection != null) {
                         if (slotSection.getBoolean("enabled")) {
                             List<Map<?, ?>> requiredList = slotSection.getMapList("requiredItems");
-                            Map<Integer, Integer> haveCounts = new HashMap();
+                            Map<Integer, Integer> haveCounts = new HashMap<>();
                             boolean canCompress = true;
 
-                            for(int i = 0; i < requiredList.size(); ++i) {
-                                Map<?, ?> map = (Map)requiredList.get(i);
-                                boolean isMythic = Boolean.TRUE.equals(map.get("isMythic"));
+                            for (int i = 0; i < requiredList.size(); ++i) {
+                                Map<?, ?> map = requiredList.get(i);
+                                boolean isMythic = Boolean.TRUE.equals(map.get("isMythicItem"));
                                 Object rawAmount = map.get("amount");
                                 if (rawAmount == null) {
                                     rawAmount = map.get("amount");
                                 }
 
-                                int need = rawAmount instanceof Number ? ((Number)rawAmount).intValue() : 1;
+                                int need = rawAmount instanceof Number ? ((Number) rawAmount).intValue() : 1;
                                 int amount;
+
                                 if (isMythic) {
                                     String mmid = map.get("mmid").toString();
                                     amount = this.guiUtil.countMythic(player, mmid);
@@ -82,43 +83,52 @@ public class GuiClickListener implements Listener {
                                 }
                             }
 
-                            for(int i = 0; i < requiredList.size(); ++i) {
-                                Map<?, ?> map = (Map)requiredList.get(i);
-                                boolean isMythic = Boolean.TRUE.equals(map.get("isMythic"));
+                            for (int i = 0; i < requiredList.size(); ++i) {
+                                Map<?, ?> map = requiredList.get(i);
+                                boolean isMythic = Boolean.TRUE.equals(map.get("isMythicItem"));
                                 String id = isMythic ? map.get("mmid").toString() : map.get("type").toString();
                                 Object rawAmount = map.get("amount");
                                 if (rawAmount == null) {
                                     rawAmount = map.get("amount");
                                 }
 
-                                int need = rawAmount instanceof Number ? ((Number)rawAmount).intValue() : 1;
-                                int amount = (Integer)haveCounts.get(i);
-                                player.sendMessage((isMythic ? "§7[§bMMID§7] " + (amount >= need ? "§a" : "§c") : "§7[§aVanilla§7] " + (amount >= need ? "§a" : "§c")) + id + " : " + amount + " / " + need);
+                                int need = rawAmount instanceof Number ? ((Number) rawAmount).intValue() : 1;
+                                int amount = haveCounts.get(i);
+
+                                String displayName;
+                                if (map.containsKey("displayName")) {
+                                    displayName = ChatColor.translateAlternateColorCodes('&', map.get("displayName").toString());
+                                } else {
+                                    displayName = id;
+                                }
+                                player.sendMessage(
+                                        (isMythic ? "§7[§bMMID§7] " : "§7[§aVanilla§7] ") + "§b" + displayName + "§7 : " + (amount >= need ? "§a" : "§c") + amount + " §7/ §a" + need
+                                );
                             }
 
                             if (canCompress) {
-                                player.sendMessage(ChatColor.AQUA + "必要数を満たしています");
-
-                                for(Map<?, ?> map : requiredList) {
-                                    boolean isMythic = Boolean.TRUE.equals(map.get("isMythic"));
-                                    String id = (String)map.get(isMythic ? "mmid" : "type");
-                                    Object rawAmount = map.get("amount");
-                                    if (rawAmount == null) {
-                                        rawAmount = map.get("amount");
+                                Inventory inv = player.getInventory();
+                                if (inv.firstEmpty() == -1) {
+                                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 2, 1);
+                                    player.sendMessage(ChatColor.GOLD + "インベントリに空きがないので変換できませんでした");
+                                    player.closeInventory();
+                                } else {
+                                    for (Map<?, ?> map : requiredList) {
+                                        boolean isMythic = Boolean.TRUE.equals(map.get("isMythicItem"));
+                                        String id = (String) map.get(isMythic ? "mmid" : "type");
+                                        Object rawAmount = map.get("amount");
+                                        if (rawAmount == null) {
+                                            rawAmount = map.get("amount");
+                                        }
+                                        int need = rawAmount instanceof Number ? ((Number) rawAmount).intValue() : 1;
+                                        this.guiUtil.removeItems(player, isMythic, id, need);
                                     }
-
-                                    int need = rawAmount instanceof Number ? ((Number)rawAmount).intValue() : 1;
-                                    this.guiUtil.removeItems(player, isMythic, id, need);
+                                    this.guiUtil.giveResultItems(player, slotSection);
                                 }
-
-                                this.guiUtil.giveResultItems(player, slotSection);
-                                player.sendMessage(ChatColor.AQUA + "アイテムを変換しました");
-                                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0F, 1.0F);
                             } else {
-                                player.sendMessage(ChatColor.RED + "必要数が不足しています");
-                                player.playSound(location,Sound.ENTITY_VILLAGER_NO, 2, 1);
+                                player.sendMessage(ChatColor.RED + "必要数が不足しています！");
+                                player.playSound(location, Sound.ENTITY_VILLAGER_NO, 2, 1);
                             }
-
                         }
                     }
                 }

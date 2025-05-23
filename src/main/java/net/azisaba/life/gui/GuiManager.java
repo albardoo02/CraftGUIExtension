@@ -57,7 +57,7 @@ public class GuiManager {
                                     String loreKey = itemData.getString("lore");
                                     if (loreKey != null && this.plugin.getConfig().contains("Lores." + loreKey)) {
                                         List<String> lore = this.plugin.getConfig().getStringList("Lores." + loreKey);
-                                        List<String> coloredLore = new ArrayList();
+                                        List<String> coloredLore = new ArrayList<>();
 
                                         for(String line : lore) {
                                             coloredLore.add(ChatColor.translateAlternateColorCodes('&', line));
