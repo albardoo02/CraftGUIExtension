@@ -59,7 +59,7 @@ public final class CraftGUIExtension extends JavaPlugin {
 
         logConfigSummary();
 
-        this.getCommand("raggui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, guiUtil));
+        this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, guiUtil));
         this.getServer().getPluginManager().registerEvents(new GuiClickListener(this, mapUtil, guiManager, guiUtil, loadedItems, loadedLores), this);
 
         this.getLogger().info("CraftGUI Extension has been enabled.");

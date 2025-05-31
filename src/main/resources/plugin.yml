@@ -3,12 +3,10 @@ version: '${project.version}'
 main: net.azisaba.life.CraftGUIExtension
 api-version: '1.15'
 authors: [albardoo02]
-description: Editable CraftGUI
+description: Configでアイテムを設定できるCraftGUI
 website: https://github.com/albardoo02/CraftGUIExtension
-softdepend:
-  - StorageBox
 commands:
-  raggui:
+  craftgui:
     aliases:
       - assyuku
       - compress
@@ -19,3 +17,5 @@ commands:
       - ragunarok
       - rgui
       - ragusugi
+      - /rgui
+      - /ragui

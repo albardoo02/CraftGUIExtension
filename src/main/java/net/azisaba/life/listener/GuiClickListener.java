@@ -169,13 +169,10 @@ public class GuiClickListener implements Listener {
         }
 
         if (slot == 45) {
-            this.plugin.getLogger().info("[GuiClickListener] Click event. CurrentPage from Holder: " + mapUtil.getPlayerPage(player.getUniqueId())+ ", MaxPage from Holder: " + guiUtil.getMaxPage() + ", Clicked slot: " + slot);
             handlePreviousPage(player, location);
         } else if (slot == 53) {
-            this.plugin.getLogger().info("[GuiClickListener] Click event. CurrentPage from Holder: " + mapUtil.getPlayerPage(player.getUniqueId())+ ", MaxPage from Holder: " + guiUtil.getMaxPage() + ", Clicked slot: " + slot);
             handleNextPage(player, location);
         } else if (slot == 49) {
-            this.plugin.getLogger().info("[GuiClickListener] Click event. CurrentPage from Holder: " + mapUtil.getPlayerPage(player.getUniqueId())+ ", MaxPage from Holder: " + guiUtil.getMaxPage() + ", Clicked slot: " + slot);
             player.closeInventory();
         }
     }

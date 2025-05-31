@@ -42,9 +42,6 @@ public class CraftGuiCommand implements CommandExecutor {
                 guiManager.openCraftGUI(player, 1);
                 mapUtil.setPlayerPage(player.getUniqueId(), 1);
                 player.sendMessage(ChatColor.DARK_GREEN + "CraftGUI Extensionを開きました");
-                int page = guiUtil.getMaxPage();
-                player.sendMessage("最大ページ数:" + page);
-                plugin.getLogger().info("[GuiManager] Opening GUI for page: " + mapUtil.getPlayerPage(player.getUniqueId()));
             } else {
                 sender.sendMessage(ChatColor.RED + "このコマンドはプレイヤーのみ実行できます");
             }
