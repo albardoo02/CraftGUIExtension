@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -45,12 +44,12 @@ public class GuiUtil{
         return countMatchingItems(player, stack -> targetMMID.equals(MythicItemUtil.getMythicType(stack)));
     }
 
-    public int countVanilla(Player player, Material mat) {
+    public int countVanilla(Player player, Material material) {
         return countMatchingItems(player, stack -> {
             ItemMeta meta = stack.getItemMeta();
             boolean hasCustomName = meta != null && meta.hasDisplayName();
 
-            return stack.getType() == mat && !hasCustomName;
+            return stack.getType() == material && !hasCustomName;
         });
     }
 
@@ -69,8 +68,8 @@ public class GuiUtil{
     }
 
     public void removeVanilla(Player player, Material material, int amount) {
-        PlayerInventory inv = player.getInventory();
         int remaining = amount;
+        PlayerInventory inv = player.getInventory();
 
         for (int i = 0; i < inv.getSize(); i++) {
             ItemStack item = inv.getItem(i);

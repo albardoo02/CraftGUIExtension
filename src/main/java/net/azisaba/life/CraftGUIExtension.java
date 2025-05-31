@@ -8,6 +8,7 @@ import net.azisaba.life.utils.GuiUtil;
 import net.azisaba.life.utils.ItemUtil;
 import net.azisaba.life.utils.MapUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public final class CraftGUIExtension extends JavaPlugin {
     private int totalItems;
     private int errorItems;
     private List<String> errorDetails;
+
+    private static boolean enabled = false;
 
     @Override
     public void onEnable() {
