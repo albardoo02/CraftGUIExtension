@@ -131,6 +131,8 @@ public class GuiManager implements Listener {
                 ItemStack prev = new ItemStack(Material.ARROW);
                 ItemMeta meta = prev.getItemMeta();
                 meta.setDisplayName(ChatColor.YELLOW + "戻る");
+                prev.setItemMeta(meta);
+                inv.setItem(45, prev);
             }
 
             if (page < maxPage) {

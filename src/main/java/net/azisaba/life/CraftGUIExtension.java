@@ -43,7 +43,7 @@ public final class CraftGUIExtension extends JavaPlugin {
             getLogger().info("config.yml is up to data.");
         }
 
-        this.guiUtil = new GuiUtil(this,loadedItems);
+        this.guiUtil = new GuiUtil(this, loadedItems, configUtil);
         this.mapUtil = new MapUtil();
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
@@ -59,7 +59,7 @@ public final class CraftGUIExtension extends JavaPlugin {
 
         logConfigSummary();
 
-        this.getCommand("raggui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager));
+        this.getCommand("raggui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, guiUtil));
         this.getServer().getPluginManager().registerEvents(new GuiClickListener(this, mapUtil, guiManager, guiUtil, loadedItems, loadedLores), this);
 
         this.getLogger().info("CraftGUI Extension has been enabled.");
@@ -89,7 +89,7 @@ public final class CraftGUIExtension extends JavaPlugin {
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
 
-        this.guiUtil = new GuiUtil(this, loadedItems);
+        this.guiUtil = new GuiUtil(this, loadedItems, configUtil);
         this.mapUtil = new MapUtil();
         this.guiManager = new GuiManager(this, mapUtil, guiUtil, loadedItems, loadedLores);
 

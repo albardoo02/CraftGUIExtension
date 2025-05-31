@@ -16,28 +16,27 @@ import java.util.Map;
 public class GuiUtil{
 
     private final CraftGUIExtension plugin;
+    private final ConfigUtil configUtil;
     private Map<String, Map<Integer, ItemUtil>> loadedItems;
 
-    public GuiUtil(CraftGUIExtension plugin, Map<String, Map<Integer, ItemUtil>> loadedItems) {
+    public GuiUtil(CraftGUIExtension plugin, Map<String, Map<Integer, ItemUtil>> loadedItems, ConfigUtil configUtil) {
         this.plugin = plugin;
         this.loadedItems = loadedItems;
+        this.configUtil = configUtil;
     }
 
     public int getMaxPage() {
-        int max = 1;
-        if (loadedItems != null && !loadedItems.isEmpty()) {
-            for (String pageKey : loadedItems.keySet()) {
-                if (pageKey.startsWith("page")) {
-                    try {
-                        int pageNum = Integer.parseInt(pageKey.substring(4));
-                        max = Math.max(max, pageNum);
-                    } catch (NumberFormatException e) {
-                        plugin.getLogger().warning("Invalid page key format in loadedItems: " + pageKey);
-                    }
-                }
-            }
+        if (configUtil == null) {
+            return 1;
         }
-        return max;
+
+        Map<String, Map<Integer, ItemUtil>> allPagesData = configUtil.loadItems();
+
+        if (allPagesData == null || allPagesData.isEmpty()) {
+            return 1;
+        }
+
+        return allPagesData.size();
     }
 
     public int countMythic(Player player, String targetMMID) {
