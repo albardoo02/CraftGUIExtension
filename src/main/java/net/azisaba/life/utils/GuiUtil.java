@@ -1,5 +1,6 @@
 package net.azisaba.life.utils;
 
+import net.azisaba.itemstash.ItemStash;
 import net.azisaba.life.CraftGUIExtension;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -133,7 +134,11 @@ public class GuiUtil{
         if (displayName != null && !displayName.isEmpty()) {
             item.getItemMeta().setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
         }
-        player.getInventory().addItem(item);
+        if (Bukkit.getPluginManager().isPluginEnabled("ItemStash")) {
+            ItemStash.getInstance().addItemToStash(player.getUniqueId(), new ItemStack(material, amount));
+        } else {
+            player.getInventory().addItem(item);
+        }
     }
 
     public void giveResultItems(Player player, List<RequiredOrResultItem> resultItems, int craftAmount) {
@@ -145,7 +150,6 @@ public class GuiUtil{
             if (result.isMythicItem()) {
                 if (result.getMmid() != null) {
                     giveMythic(player, result.getMmid(), totalAmount);
-                    player.sendMessage("§7[§bMMID§7] §a" + displayName + ChatColor.WHITE +"を" + totalAmount + "個付与しました");
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0F, 1.0F);
                 }
             } else {
@@ -154,7 +158,7 @@ public class GuiUtil{
                     continue;
                 }
                 giveVanilla(player, result.getType(), displayName, totalAmount);
-                player.sendMessage("§7[§aVanilla§7] " + ChatColor.AQUA + displayName + ChatColor.WHITE + "を" + totalAmount + "個付与しました");
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&aCraftGUI&7] &b" + displayName + " &7(×" + totalAmount + ")&aを付与しました"));
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0F, 1.0F);
             }
         }

@@ -6,7 +6,7 @@
 
   <groupId>net.azisaba.life</groupId>
   <artifactId>CraftGuiExtension</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <packaging>jar</packaging>
 
   <name>CraftGuiExtension</name>
@@ -68,6 +68,12 @@
             <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>local</groupId>
+            <artifactId>ItemStash</artifactId>
+            <version>2.2.5</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/ItemStash.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

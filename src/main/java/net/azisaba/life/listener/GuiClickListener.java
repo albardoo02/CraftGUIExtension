@@ -80,7 +80,7 @@ public class GuiClickListener implements Listener {
         int maxCraftableAmount = getMaxCraftableAmount(player, requiredItems);
 
         if (maxCraftableAmount == 0) {
-            player.sendMessage(ChatColor.RED + "必要素材が不足しています．");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&aCraftGUI&7] &c変換に必要なアイテムが不足しています"));
             player.playSound(location, Sound.ENTITY_VILLAGER_NO, 2, 1);
             return;
         }
@@ -102,7 +102,7 @@ public class GuiClickListener implements Listener {
 
         boolean hasEnoughSpace = true;
         for (RequiredOrResultItem resultItem : clickedItemUtil.getResultItems()) {
-            if (resultItem.getType() != null && resultItem.getType() != Material.AIR) { // バニラアイテムの場合
+            if (resultItem.getType() != null && resultItem.getType() != Material.AIR) {
                 if (player.getInventory().firstEmpty() == -1 && resultItem.getAmount() * craftAmount > 0) {
                     hasEnoughSpace = false;
                     break;
@@ -112,7 +112,7 @@ public class GuiClickListener implements Listener {
 
         if (!hasEnoughSpace) {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 2, 1);
-            player.sendMessage(ChatColor.GOLD + "インベントリに空きがないので変換できませんでした");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&aCraftGUI&7] &6インベントリに空きがないので変換できません"));
             player.closeInventory();
             return;
         }
@@ -121,7 +121,7 @@ public class GuiClickListener implements Listener {
         guiUtil.giveResultItems(player, clickedItemUtil.getResultItems(), craftAmount);
 
         player.playSound(location, Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-        player.sendMessage(ChatColor.GREEN + "アイテムを" + craftAmount + "回変換しました");
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7[&aCraftGUI&7] &aアイテムを" + craftAmount + "回変換しました"));
 
         guiManager.openCraftGUI(player, currentPage);
     }

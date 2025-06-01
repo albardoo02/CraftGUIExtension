@@ -70,7 +70,7 @@ public class GuiManager implements Listener {
                 }
 
                 List<String> requirementLore = new ArrayList<>();
-                requirementLore.add(ChatColor.GRAY + "必要素材:");
+                requirementLore.add(ChatColor.GRAY + "変換に必要素材:");
 
                 boolean canCraft = true;
 
