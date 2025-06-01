@@ -3,23 +3,10 @@
 ## 概要
 アジ鯖のLife鯖にあるCraftGUIの後継開発版
 
-変換するアイテムをConfigから設定できるように改良中
+変換するアイテムと変換に必要なアイテムをConfigから設定できます
 
 ## 動作環境
-NMSを使用しているため、Minecraft Ver 1.15.2のみ使用可能です。
-
-## 導入方法
-1：Releasesから最新のjarファイルをダウンロードする
-
-2：サーバーのpluginsフォルダに入れる
-
-3：Plugmanを利用してロードするか、サーバーを再起動する
-
-4：CraftGUIExtensionフォルダ内にあるconfig.ymlを設定する
-
-5：PlugmanでConfigを再読み込みするか、サーバーを再起動する
-
-※今後，Reloadコマンドを実装予定です
+NMSを使用しているため、Minecraft Ver 1.15.2のみ使用可能です
 
 ## Configの設定
 ```yaml
