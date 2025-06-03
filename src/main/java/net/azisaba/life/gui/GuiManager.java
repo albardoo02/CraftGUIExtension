@@ -80,7 +80,7 @@ public class GuiManager implements Listener {
 
                     int playerAmount = 0;
                     if (requiredItem.isMythicItem()) {
-                        playerAmount = guiUtil.countMythic(player, requiredItem.getMmid());
+                        playerAmount = guiUtil.countMythic(player, requiredItem.getMmid(), requiredItem.getDisplayName());
                     } else if (requiredItem.getType() != null) {
                         playerAmount = guiUtil.countVanilla(player, requiredItem.getType());
                     }

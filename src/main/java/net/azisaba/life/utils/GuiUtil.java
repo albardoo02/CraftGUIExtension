@@ -18,11 +18,9 @@ public class GuiUtil{
 
     private final CraftGUIExtension plugin;
     private final ConfigUtil configUtil;
-    private Map<String, Map<Integer, ItemUtil>> loadedItems;
 
-    public GuiUtil(CraftGUIExtension plugin, Map<String, Map<Integer, ItemUtil>> loadedItems, ConfigUtil configUtil) {
+    public GuiUtil(CraftGUIExtension plugin, ConfigUtil configUtil) {
         this.plugin = plugin;
-        this.loadedItems = loadedItems;
         this.configUtil = configUtil;
     }
 
@@ -40,8 +38,31 @@ public class GuiUtil{
         return allPagesData.size();
     }
 
-    public int countMythic(Player player, String targetMMID) {
-        return countMatchingItems(player, stack -> targetMMID.equals(MythicItemUtil.getMythicType(stack)));
+    public int countMythic(Player player, String targetMMID, String displayNameFromConfig) {
+        return countMatchingItems(player, stack -> {
+            String mmid = MythicItemUtil.getMythicType(stack);
+            String displayName = null;
+            ItemMeta meta = stack.getItemMeta();
+            if (meta != null && meta.hasDisplayName()) {
+                displayName = meta.getDisplayName();
+            }
+
+            if (targetMMID != null && !targetMMID.isEmpty()) {
+                if (targetMMID.equals(mmid)) {
+                    return true;
+                }
+            }
+
+            if (displayNameFromConfig != null && !displayNameFromConfig.isEmpty()) {
+                if (displayName != null) {
+                    String configDisplayName = ChatColor.translateAlternateColorCodes('&',displayNameFromConfig);
+                    if (configDisplayName.equals(displayName)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
     }
 
     public int countVanilla(Player player, Material material) {
@@ -63,8 +84,8 @@ public class GuiUtil{
         return count;
     }
 
-    public void removeMythic(Player player, String mmid, int amount) {
-        removeItemsInternal(player, true, mmid, amount);
+    public void removeMythic(Player player, String mmid, String displayNameFromConfig, int amount) {
+        removeItemsInternal(player, true, mmid, displayNameFromConfig, amount);
     }
 
     public void removeVanilla(Player player, Material material, int amount) {
@@ -93,30 +114,60 @@ public class GuiUtil{
         }
     }
 
-    private void removeItemsInternal(Player player, boolean isMythic, String idOrMaterial, int amount) {
+    private void removeItemsInternal(Player player, boolean isMythic, String idOrMaterial, String displayNameFromConfig, int amount) {
         PlayerInventory inv = player.getInventory();
         int remaining = amount;
 
         for (int i = 0; i < inv.getSize(); i++) {
-            ItemStack item = inv.getItem(i);
-            if (item == null || item.getType() == Material.AIR) continue;
-
-            boolean matched = isMythic
-                    ? idOrMaterial.equalsIgnoreCase(MythicItemUtil.getMythicType(item))
-                    : item.getType().name().equalsIgnoreCase(idOrMaterial);
-
-            if (!matched) continue;
-
-            int stackAmount = item.getAmount();
-            if (stackAmount <= remaining) {
-                inv.setItem(i, null);
-                remaining -= stackAmount;
-            } else {
-                item.setAmount(stackAmount - remaining);
-                remaining = 0;
+            if (remaining <= 0) {
+                break;
             }
 
-            if (remaining <= 0) break;
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
+
+            String mmid = null;
+            String displayName = null;
+            ItemMeta meta = item.getItemMeta();
+
+            if (isMythic) {
+                mmid = MythicItemUtil.getMythicType(item);
+            }
+            if (meta != null && meta.hasDisplayName()) {
+                displayName = meta.getDisplayName();
+            }
+
+            boolean matched = false;
+
+            if (isMythic) {
+                if (idOrMaterial != null && !idOrMaterial.isEmpty()) {
+                    if (idOrMaterial.equalsIgnoreCase(mmid)) {
+                        matched = true;
+                    }
+                }
+
+                if (!matched && displayNameFromConfig != null && !displayNameFromConfig.isEmpty()) {
+                    if (displayName != null) {
+                        String configDisplayNameProcessed = ChatColor.translateAlternateColorCodes('&', displayNameFromConfig);
+                        if (configDisplayNameProcessed.equals(displayName)) {
+                            matched = true;
+                        }
+                    }
+                }
+            }
+
+            if (matched) {
+                int stackAmount = item.getAmount();
+                if (stackAmount <= remaining) {
+                    inv.setItem(i, null);
+                    remaining -= stackAmount;
+                } else {
+                    item.setAmount(stackAmount - remaining);
+                    remaining = 0;
+                }
+            }
         }
     }
 

@@ -8,7 +8,6 @@ import net.azisaba.life.utils.GuiUtil;
 import net.azisaba.life.utils.ItemUtil;
 import net.azisaba.life.utils.MapUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -43,7 +42,7 @@ public final class CraftGUIExtension extends JavaPlugin {
             getLogger().info("config.yml is up to data.");
         }
 
-        this.guiUtil = new GuiUtil(this, loadedItems, configUtil);
+        this.guiUtil = new GuiUtil(this, configUtil);
         this.mapUtil = new MapUtil();
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
@@ -89,7 +88,7 @@ public final class CraftGUIExtension extends JavaPlugin {
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
 
-        this.guiUtil = new GuiUtil(this, loadedItems, configUtil);
+        this.guiUtil = new GuiUtil(this, configUtil);
         this.mapUtil = new MapUtil();
         this.guiManager = new GuiManager(this, mapUtil, guiUtil, loadedItems, loadedLores);
 

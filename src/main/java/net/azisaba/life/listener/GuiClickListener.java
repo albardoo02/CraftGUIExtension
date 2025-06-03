@@ -130,16 +130,15 @@ public class GuiClickListener implements Listener {
         int maxCraftable = Integer.MAX_VALUE;
 
         for (RequiredOrResultItem requiredItem : requiredItems) {
-            String requiredDisplay = requiredItem.getDisplayName();
             int amountNeededPerCraft = requiredItem.getAmount();
 
             if (amountNeededPerCraft <= 0) {
-                plugin.getLogger().warning("Required item " + requiredDisplay + " has amount <= 0. Skipping for craftability check.");
+                plugin.getLogger().warning("Required item " + requiredItem.getDisplayName() + " has amount <= 0. Skipping for craftability check.");
                 continue;
             }
             int playerAmount = 0;
             if (requiredItem.isMythicItem()) {
-                playerAmount = guiUtil.countMythic(player, requiredItem.getMmid());
+                playerAmount = guiUtil.countMythic(player, requiredItem.getMmid(), requiredItem.getDisplayName());
             } else if (requiredItem.getType() != null) {
                 playerAmount = guiUtil.countVanilla(player, requiredItem.getType());
             }
@@ -156,7 +155,7 @@ public class GuiClickListener implements Listener {
         for (RequiredOrResultItem requiredItem : requiredItems) {
             int totalAmountToConsume = requiredItem.getAmount() * craftAmount;
             if (requiredItem.isMythicItem()) {
-                guiUtil.removeMythic(player, requiredItem.getMmid(), totalAmountToConsume);
+                guiUtil.removeMythic(player, requiredItem.getMmid(), requiredItem.getDisplayName(), totalAmountToConsume);
             } else if (requiredItem.getType() != null) {
                 guiUtil.removeVanilla(player, requiredItem.getType(), totalAmountToConsume);
             }
