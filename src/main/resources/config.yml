@@ -1,67 +1,56 @@
-configVersion: 1.2
+# CraftGUI Extension Configuration
+configVersion: 1.3
 
+# GUIに表示するアイテムの設定
 Items:
+  # ページ番号
   page1:
+    # スロット番号 (1ページにつき0～44まで設定可能です)
     0:
+      # 変換を有効にするかどうか
       enabled: true
-      material: GOLDEN_HELMET
-      displayName: '&cGWツール分解'
-      lore: 'CommonLore'
-      enchanted: true
-      model: 0
-      requiredItems:
-        - isMythicItem: true
-          mmid: '2025_GW_event_items_GWショベル10S'
-          displayName: '&6GWショベル'
-          amount: 1
-        - isMythicItem: false
-          type: DIAMOND_BLOCK
-          displayName: '&fダイヤモンドブロック'
-          amount: 64
-      resultItems:
-        - isMythicItem: true
-          mmid: '2025_GW_event_items_GWチケット'
-          displayName: '&6&lGW&e&lチケット'
-          amount: 16
-        - isMythicItem: false
-          type: GOLD_INGOT
-          displayName: '&f金インゴット'
-          amount: 16
-    1:
-      enabled: true
+      # アイテムID
       material: SPONGE
-      displayName: '&eすっごいスポンジ&c(偽物)'
+      # アイテムの表示名
+      displayName: '&eスポンジ'
+      # Loreの設定
+      # Loresセクションで設定した項目を設定してください
       lore: 'CommonLore'
+      # エンチャントするかどうか
       enchanted: false
+      # カスタムモデルデータ番号
       model: 0
+      # 変換に必要なアイテム
       requiredItems:
-        - isMythicItem: false
-          type: YELLOW_DYE
+          # バニラアイテムであればtype, MythicMobsアイテムであればmmidを設定してください
+        - type: YELLOW_DYE
+          # アイテムの表示名
+          # mmidを設定したとき二，変換するアイテムのmmidがnullの場合はこの項目が使用されます
           displayName: '&e黄色の染料'
+          # 変換に必要なアイテムの個数
           amount: 4
-        - isMythicItem: false
-          type: GRAVEL
+        - type: GRAVEL
           displayName: '&f砂利'
           amount: 2
-        - isMythicItem: false
-          type: SAND
+        - type: SAND
           displayName: '&f砂'
           amount: 2
-        - isMythicItem: false
-          type: HAY_BLOCK
+        - type: HAY_BLOCK
           displayName: '&f俵'
           amount: 1
+      # 変換する際に付与するアイテム
       resultItems:
-        - isMythicItem: false
-          type: SPONGE
+          # バニラアイテムであればtype，MythicMobsアイテムであればmmidを設定してください
+        - type: SPONGE
+          # アイテムの表示名
           displayName: '&fスポンジ'
+          # 付与する個数
           amount: 1
 
-
+# Loreの設定
 Lores:
+  # Loreの設定名
   CommonLore:
     - '&f左クリックで1回変換します'
     - '&f右クリックで上限まで変換します'
     - ''
-  need9:
-    - '&f圧縮に必要な数: &a9'

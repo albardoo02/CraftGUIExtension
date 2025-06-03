@@ -38,14 +38,14 @@ public class ConfigUtil {
         Path oldPath = Paths.get(plugin.getDataFolder().getPath(), "oldConfig", oldFileName);
         try {
             Files.move(configFile.toPath(), oldPath, StandardCopyOption.REPLACE_EXISTING);
-            plugin.getLogger().info(ChatColor.YELLOW + "New version of config.yml found.");
-            plugin.getLogger().info(ChatColor.YELLOW + "Attempting update...");
+            plugin.getLogger().info(ChatColor.YELLOW + "新しいバージョンのconfig.ymlが必要です");
+            plugin.getLogger().info(ChatColor.YELLOW + "config.ymlの更新をしています...");
         } catch (IOException e) {
             e.printStackTrace();
         }
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
-        plugin.getLogger().info(ChatColor.GREEN + "Successfully update config.yml.");
+        plugin.getLogger().info(ChatColor.GREEN + "config.ymlを最新バージョンに更新しました");
     }
 
     public Map<String, Map<Integer, ItemUtil>> loadItems() {
@@ -53,14 +53,14 @@ public class ConfigUtil {
         ConfigurationSection itemsSection = plugin.getConfig().getConfigurationSection("Items");
 
         if (itemsSection == null) {
-            plugin.getLogger().warning("Config section 'Items' not found.");
+            plugin.getLogger().warning("config.ymlにItemsセクションがありません");
             return items;
         }
 
         for (String pageKey : itemsSection.getKeys(false)) {
             ConfigurationSection pageSection = itemsSection.getConfigurationSection(pageKey);
             if (pageSection == null) {
-                plugin.getLogger().warning("Invalid section under 'Items': " + pageKey);
+                plugin.getLogger().warning(pageKey + "は無効なセクションです");
                 continue;
             }
 
@@ -68,7 +68,7 @@ public class ConfigUtil {
             for (String slotKey : pageSection.getKeys(false)) {
                 ConfigurationSection itemSection = pageSection.getConfigurationSection(slotKey);
                 if (itemSection == null) {
-                    addError(pageKey, slotKey, "Item section is null.");
+                    addError(pageKey, slotKey, "Itemsセクションはnullです");
                     continue;
                 }
 
@@ -87,11 +87,11 @@ public class ConfigUtil {
                     pageItems.put(Integer.parseInt(slotKey), customItem);
 
                 } catch (IllegalArgumentException e) {
-                    addError(pageKey, slotKey, "Invalid material or other parse error: " + e.getMessage());
+                    addError(pageKey, slotKey, "無効なアイテムIDかその他エラー: " + e.getMessage());
                 } catch (NullPointerException e) {
-                    addError(pageKey, slotKey, "Missing required field: " + e.getMessage());
+                    addError(pageKey, slotKey, "必要なフィールドがありません " + e.getMessage());
                 } catch (Exception e) {
-                    addError(pageKey, slotKey, "Unknown error: " + e.getMessage());
+                    addError(pageKey, slotKey, "不明なエラーが発生しました: " + e.getMessage());
                 }
             }
             items.put(pageKey, pageItems);
@@ -102,14 +102,14 @@ public class ConfigUtil {
     private List<RequiredOrResultItem> parseRequiredOrResultItemsList(List<?> itemList, String parentKey, String pageKey, String slotKey) {
         List<RequiredOrResultItem> items = new ArrayList<>();
         if (itemList == null || itemList.isEmpty()) {
-            plugin.getLogger().log(Level.FINE, String.format("Section '%s' for page '%s', slot '%s' is missing or empty. Skipping.", parentKey, pageKey, slotKey));
+            plugin.getLogger().log(Level.FINE, String.format("ページ%sのスロット%sは欠落もしくは空のためスキップします", pageKey, slotKey));
             return items;
         }
 
         int index = 0;
         for (Object obj : itemList) {
             if (!(obj instanceof Map)) {
-                addError(pageKey, slotKey, parentKey + "[" + index + "] is not a map. Found type: " + obj.getClass().getName());
+                addError(pageKey, slotKey, parentKey + "[" + index + "] はマップではありません．見つかった型: " + obj.getClass().getName());
                 index++;
                 continue;
             }
@@ -118,33 +118,55 @@ public class ConfigUtil {
             Map<String, Object> itemMap = (Map<String, Object>) obj;
 
             try {
-                boolean isMythicItem = (boolean) itemMap.getOrDefault("isMythicItem", false);
+                // boolean isMythicItem = (boolean) itemMap.getOrDefault("isMythicItem", false);
                 String mmid = (String) itemMap.get("mmid");
+                String typeStr = (String) itemMap.get("type");
+
+                boolean isMythicItem;
                 Material type = null;
-                if (!isMythicItem) {
-                    String typeStr = (String) itemMap.get("type");
-                    if (typeStr == null) {
-                        throw new NullPointerException("'type' field is missing for non-Mythic item.");
+
+                if (mmid != null && !mmid.trim().isEmpty()) {
+                    isMythicItem = true;
+                    if (typeStr != null && !typeStr.trim().isEmpty()) {
+                        addError(pageKey, slotKey, parentKey + "[" + index + "] mmidとtypeの両方が設定されているため，mmidが使用されました");
                     }
-                    type = Material.valueOf(typeStr.toUpperCase());
-                }
-                String displayName = ChatColor.translateAlternateColorCodes('&', (String) itemMap.getOrDefault("displayName", ""));
-                int amount = (int) itemMap.getOrDefault("amount", 0);
-                if (amount == 0 && itemMap.containsKey("amount") && itemMap.get("amount") instanceof Integer) {
-                } else if (!itemMap.containsKey("amount")) {
-                    throw new NullPointerException("'amount' field is missing.");
+                } else if (typeStr != null && !typeStr.trim().isEmpty()) {
+                    isMythicItem = false;
+                    try {
+                        type = Material.valueOf(typeStr.trim().toUpperCase());
+                    } catch (IllegalArgumentException exception) {
+                        addError(pageKey, slotKey, parentKey + "[" + index + "] " + typeStr + "は無効なアイテムIDです");
+                        index++;
+                        continue;
+                    }
+                } else {
+                    addError(pageKey, slotKey, parentKey + "[" + index + "] mmidもしくはtypeを設定してください");
+                    index++;
+                    continue;
                 }
 
+                String displayName = ChatColor.translateAlternateColorCodes('&', (String) itemMap.getOrDefault("displayName", ""));
+                int amount = 1;
+                Object amountObj = itemMap.get("amount");
+                if (amountObj instanceof Integer) {
+                    amount = (Integer) amountObj;
+                } else if (amountObj != null) {
+                    addError(pageKey, slotKey, parentKey + "[" + index + "] " + amountObj + "は有効な整数ではありません");
+                    index++;
+                    continue;
+                }
+
+                if (amount < 0) {
+                    addError(pageKey, slotKey, parentKey + "[" + index + "] amountは0より大きい値を設定して下さい");
+                    index++;
+                    continue;
+                }
 
                 items.add(new RequiredOrResultItem(isMythicItem, mmid, type, displayName, amount));
             } catch (ClassCastException e) {
-                addError(pageKey, slotKey, parentKey + "[" + index + "] Data type mismatch: " + e.getMessage() + ". Map: " + itemMap);
-            } catch (IllegalArgumentException e) {
-                addError(pageKey, slotKey, parentKey + "[" + index + "] Invalid material type or enum constant: " + e.getMessage());
-            } catch (NullPointerException e) {
-                addError(pageKey, slotKey, parentKey + "[" + index + "] Missing required field: " + e.getMessage());
-            } catch (Exception e) {
-                addError(pageKey, slotKey, parentKey + "[" + index + "] Unknown error: " + e.getMessage());
+                addError(pageKey, slotKey, parentKey + "[" + index + "] データ型が一致しません: " + e.getMessage() + ".Map:" + itemMap);
+            }  catch (Exception e) {
+                addError(pageKey, slotKey, parentKey + "[" + index + "] 不明なエラーが発生しました: " + e.getMessage());
             }
             index++;
         }
@@ -157,7 +179,7 @@ public class ConfigUtil {
         ConfigurationSection loresSection = plugin.getConfig().getConfigurationSection("Lores");
 
         if (loresSection == null) {
-            plugin.getLogger().warning("Config section 'Lores' not found.");
+            plugin.getLogger().warning("Loresセクションが見つかりません");
             return lores;
         }
 
@@ -174,8 +196,7 @@ public class ConfigUtil {
 
     private void addError(String pageKey, String slotKey, String message) {
         errorItems++;
-        errorDetail.add(String.format("Error in page '%s', slot '%s': %s", pageKey, slotKey, message));
-        plugin.getLogger().log(Level.WARNING, String.format("Config load error in page '%s', slot '%s': %s", pageKey, slotKey, message));
+        errorDetail.add(String.format("ページ%sのスロット%sでエラーが発生しました: %s", pageKey, slotKey, message));
     }
 
     public int getErrorItemsCount() {
