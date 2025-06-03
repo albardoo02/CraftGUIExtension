@@ -11,14 +11,7 @@ website: https://github.com/albardoo02/CraftGUIExtension
 commands:
   craftgui:
     aliases:
-      - assyuku
-      - compress
-      - ragggui
-      - ragguui
-      - ragui
-      - raguiyan
-      - ragunarok
       - rgui
-      - ragusugi
       - /rgui
+      - ragui
       - /ragui
