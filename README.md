@@ -10,62 +10,65 @@ NMSを使用しているため、Minecraft Ver 1.15.2のみ使用可能です
 
 ## Configの設定
 ```yaml
-# GUIに登録するアイテム一覧
-# カラーコードが使用可能です
+# CraftGUI Extension Configuration
+configVersion: 1.3
+
+# GUIに表示するアイテムの設定
 Items:
   # ページ番号
   page1:
-    # アイテムを配置するスロット番号(0～44まで)
+    # スロット番号 (1ページにつき0～44まで設定可能です)
     0:
-      # 圧縮可能にするかどうか
+      # 変換を有効にするかどうか
       enabled: true
       # アイテムID
-      material: STONE
+      material: SPONGE
       # アイテムの表示名
-      displayName: 'スポンジ'
-      # 以下のLoresで設定したLore名を設定してください
+      displayName: '&eスポンジ'
+      # Loreの設定
+      # Loresセクションで設定した項目を設定してください
       lore: 'CommonLore'
-      # エンチャントをするかどうか
-      enchant: false
-      # Model番号を指定する場合に記載
-      # デフォルトは0です
+      # エンチャントするかどうか
+      enchanted: false
+      # カスタムモデルデータ番号
       model: 0
-      # アイテムの変換に必要なアイテムの設定
+      # 変換に必要なアイテム
       requiredItems:
-        # MythicMobsアイテムかどうか
-        - isMythic: true
-          # 変換に必要なアイテムIDの設定
-          # バニラアイテムはtype，MMアイテムはmmidで設定して下さい．
-          mmid: '2025_GW_event_items_GWショベル10S'
+          # バニラアイテムであればtype, MythicMobsアイテムであればmmidを設定してください
+        - type: YELLOW_DYE
           # アイテムの表示名
-          displayName: '&6GWショベル'
-          # アイテムの最小必要数
+          # mmidを設定したとき二，変換するアイテムのmmidがnullの場合はこの項目が使用されます
+          displayName: '&e黄色の染料'
+          # 変換に必要なアイテムの個数
+          amount: 4
+        - type: GRAVEL
+          displayName: '&f砂利'
+          amount: 2
+        - type: SAND
+          displayName: '&f砂'
+          amount: 2
+        - type: HAY_BLOCK
+          displayName: '&f俵'
           amount: 1
-        - isMythic: false
-          type: DIAMOND_BLOCK
-          displayName: '&fダイヤモンドブロック'
-          amount: 64
+      # 変換する際に付与するアイテム
       resultItems:
-        - isMythicItem: true
-          mmid: '2025_GW_event_items_GWチケット'
-          displayName: '&6&lGW&e&lチケット'
-          amount: 16
-        - isMythicItem: false
-          type: GOLD_INGOT
-          displayName: '&f金インゴット'
-          amount: 16
+          # バニラアイテムであればtype，MythicMobsアイテムであればmmidを設定してください
+        - type: SPONGE
+          # アイテムの表示名
+          displayName: '&fスポンジ'
+          # 付与する個数
+          amount: 1
 
+# Loreの設定
 Lores:
-  # Loreの設定名
   CommonLore:
-    - '&f1行目'
-    - '&f2行目'
-  need9:
-    - '&f圧縮に必要な数: &a9'
+    - '&f左クリックで1回変換します'
+    - '&f右クリックで上限まで変換します'
+    - ''
 ```
 
 ## 使い方
-- `/raggui`：CraftGUI Extensionを開きます
+- `//rgui`：CraftGUI Extensionを開きます
 
 ## ライセンス / License
 [GNU General Public License v3.0](LICENSE)
