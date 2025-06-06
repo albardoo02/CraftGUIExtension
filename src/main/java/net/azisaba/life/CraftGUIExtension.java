@@ -58,8 +58,10 @@ public final class CraftGUIExtension extends JavaPlugin {
 
         logConfigSummary();
 
-        this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, guiUtil));
-        this.getServer().getPluginManager().registerEvents(new GuiClickListener(this, mapUtil, guiManager, guiUtil, loadedItems, loadedLores), this);
+        configUtil.createLogDirectory();
+
+        this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager));
+        this.getServer().getPluginManager().registerEvents(new GuiClickListener(this, mapUtil, guiManager, guiUtil, loadedItems, loadedLores, configUtil), this);
     }
 
     private void logConfigSummary() {

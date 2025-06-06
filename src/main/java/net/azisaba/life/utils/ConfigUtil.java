@@ -5,16 +5,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ConfigUtil {
@@ -29,13 +26,13 @@ public class ConfigUtil {
 
     public void updateConfig() {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
-        File oldFolder = new File(plugin.getDataFolder(), "oldConfig");
+        File oldFolder = new File(plugin.getDataFolder(), "old");
 
         if (!oldFolder.exists()) {
             oldFolder.mkdir();
         }
         String oldFileName = "config-v" + plugin.getConfig().getString("configVersion", "0.0") + ".yml";
-        Path oldPath = Paths.get(plugin.getDataFolder().getPath(), "oldConfig", oldFileName);
+        Path oldPath = Paths.get(plugin.getDataFolder().getPath(), "old", oldFileName);
         try {
             Files.move(configFile.toPath(), oldPath, StandardCopyOption.REPLACE_EXISTING);
             plugin.getLogger().info(ChatColor.YELLOW + "新しいバージョンのconfig.ymlが必要です");
@@ -205,6 +202,29 @@ public class ConfigUtil {
 
     public List<String> getErrorsDetail() {
         return errorDetail;
+    }
+
+    public void saveLog(String message) {
+        File logFile = new File(plugin.getDataFolder(), "logs" + File.separator + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".log");
+
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
+            String timestamp = new SimpleDateFormat("HH:mm:ss").format(new Date());
+            writer.println("[" + timestamp + "] " + message);
+        } catch (IOException exception) {
+            plugin.getLogger().severe("ログファイルへの書き込みに失敗しました");
+            exception.printStackTrace();
+        }
+    }
+
+    public void createLogDirectory() {
+        File logDirectory = new File(plugin.getDataFolder(), "logs");
+        if (!logDirectory.exists()) {
+            if (logDirectory.mkdirs()) {
+                plugin.getLogger().info("ログディレクトリを作成しました: " + logDirectory.getPath());
+            } else {
+                plugin.getLogger().severe("ログディレクトリの作成に失敗しました");
+            }
+        }
     }
 
 }

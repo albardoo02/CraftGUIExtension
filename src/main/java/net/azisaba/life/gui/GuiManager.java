@@ -85,7 +85,7 @@ public class GuiManager implements Listener {
                         playerAmount = guiUtil.countVanilla(player, requiredItem.getType());
                     }
 
-                    String title = playerAmount >= amount ? ChatColor.GREEN + "✓ " : ChatColor.RED + "✘ ";
+                    String title = playerAmount >= amount ? ChatColor.GREEN + "✓ " + ChatColor.RESET: ChatColor.RED + "✘ " + ChatColor.RESET;
                     ChatColor color = playerAmount >= amount ? ChatColor.GREEN : ChatColor.RED;
 
                     String hasItemMessage = getString(playerAmount, amount);
@@ -103,7 +103,7 @@ public class GuiManager implements Listener {
                 if (canCraft) {
                     combinedLore.add(ChatColor.GREEN + "✓ 変換可能です");
                 } else {
-                    combinedLore.add(ChatColor.RED + "✘ 素材が不足しているため変換できません");
+                    combinedLore.add(ChatColor.RED + "✘ 変換できません");
                 }
 
                 meta.setLore(combinedLore);

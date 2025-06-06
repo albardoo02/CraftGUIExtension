@@ -1,6 +1,10 @@
 # CraftGUI Extension Configuration
 configVersion: 1.3
 
+# メッセージのPrefixを設定します
+# prefix + message
+prefix: ""
+
 # GUIに表示するアイテムの設定
 Items:
   # ページ番号

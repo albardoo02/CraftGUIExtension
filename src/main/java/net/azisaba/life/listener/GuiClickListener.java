@@ -2,10 +2,7 @@ package net.azisaba.life.listener;
 
 import net.azisaba.life.CraftGUIExtension;
 import net.azisaba.life.gui.GuiManager;
-import net.azisaba.life.utils.GuiUtil;
-import net.azisaba.life.utils.ItemUtil;
-import net.azisaba.life.utils.MapUtil;
-import net.azisaba.life.utils.RequiredOrResultItem;
+import net.azisaba.life.utils.*;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GuiClickListener implements Listener {
 
@@ -26,15 +24,17 @@ public class GuiClickListener implements Listener {
     private final GuiUtil guiUtil;
     private final Map<String, Map<Integer, ItemUtil>> loadedItems;
     private final Map<String, List<String>> loadedLores;
+    private final ConfigUtil configUtil;
 
 
-    public GuiClickListener(CraftGUIExtension plugin, MapUtil mapUtil, GuiManager guiManager, GuiUtil guiUtil, Map<String, Map<Integer, ItemUtil>> loadedItems, Map<String, List<String>> loadedLores) {
+    public GuiClickListener(CraftGUIExtension plugin, MapUtil mapUtil, GuiManager guiManager, GuiUtil guiUtil, Map<String, Map<Integer, ItemUtil>> loadedItems, Map<String, List<String>> loadedLores, ConfigUtil configUtil) {
         this.plugin = plugin;
         this.mapUtil = mapUtil;
         this.guiManager = guiManager;
         this.guiUtil = guiUtil;
         this.loadedItems = loadedItems;
         this.loadedLores = loadedLores;
+        this.configUtil = configUtil;
     }
 
     @EventHandler
@@ -119,6 +119,32 @@ public class GuiClickListener implements Listener {
 
         consumeRequiredItems(player, requiredItems, craftAmount);
         guiUtil.giveResultItems(player, clickedItemUtil.getResultItems(), craftAmount);
+
+        try {
+            int finalCraftAmount = craftAmount;
+            String requiredItemsString = requiredItems.stream()
+                    .map(item -> String.format("%s(x%d)",
+                            ChatColor.stripColor(item.getDisplayName()),
+                            item.getAmount() * finalCraftAmount))
+                    .collect(Collectors.joining(", "));
+
+            int finalCraftAmount1 = craftAmount;
+            String resultItemsString = clickedItemUtil.getResultItems().stream()
+                    .map(item -> String.format("%s(x%d)",
+                            ChatColor.stripColor(item.getDisplayName()),
+                            item.getAmount() * finalCraftAmount1))
+                    .collect(Collectors.joining(", "));
+
+            String logMessage = String.format("%sが%sを%sに変換しました (UUID: %s)",
+                    player.getName(), requiredItemsString, resultItemsString, player.getUniqueId());
+
+            plugin.getLogger().info(logMessage);
+            configUtil.saveLog(logMessage);
+
+        } catch (Exception e) {
+            plugin.getLogger().severe("ログの記録中にエラーが発生しました");
+            e.printStackTrace();
+        }
 
         player.playSound(location, Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
         player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&7[&aCraftGUI&7] &aアイテムを" + craftAmount + "回変換しました"));

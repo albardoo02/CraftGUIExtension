@@ -15,13 +15,11 @@ public class CraftGuiCommand implements CommandExecutor {
     private final CraftGUIExtension plugin;
     private final MapUtil mapUtil;
     private final GuiManager guiManager;
-    private final GuiUtil guiUtil;
 
-    public CraftGuiCommand(CraftGUIExtension plugin, MapUtil mapUtil, GuiManager guiManager, GuiUtil guiUtil) {
+    public CraftGuiCommand(CraftGUIExtension plugin, MapUtil mapUtil, GuiManager guiManager) {
         this.plugin = plugin;
         this.mapUtil = mapUtil;
         this.guiManager = guiManager;
-        this.guiUtil = guiUtil;
     }
 
     @Override
