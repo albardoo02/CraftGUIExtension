@@ -15,3 +15,9 @@ commands:
       - /rgui
       - ragui
       - /ragui
+
+permissions:
+  craftguiextension.reload:
+    default: op
+  craftguiextension.register:
+    default: op

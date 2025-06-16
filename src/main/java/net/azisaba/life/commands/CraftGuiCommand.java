@@ -46,7 +46,12 @@ public class CraftGuiCommand implements CommandExecutor {
             }
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("register")) {
-                    editorManager.start(player);
+                    if (player.hasPermission("craftguiextension.register")) {
+                        editorManager.start(player);
+                    } else {
+                        player.sendMessage(ChatColor.RED + "権限がありません");
+                    }
+                    return true;
                 } else {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&',"/craftgui"));
                 }
