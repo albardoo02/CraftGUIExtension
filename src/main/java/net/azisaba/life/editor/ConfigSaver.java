@@ -1,0 +1,101 @@
+package net.azisaba.life.editor;
+
+import net.azisaba.life.CraftGUIExtension;
+import net.azisaba.life.utils.MythicItemUtil;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class ConfigSaver {
+
+    private final CraftGUIExtension plugin;
+    private final RecipeBuilder builder;
+
+    public ConfigSaver(CraftGUIExtension plugin, RecipeBuilder builder) {
+        this.plugin = plugin;
+        this.builder = builder;
+    }
+
+    public boolean save() {
+        FileConfiguration config = plugin.getConfig();
+        ItemStack mainItem = builder.getMainItem();
+
+        if (mainItem == null || mainItem.getType().isAir()) return false;
+
+        String path = findNextAvailablePath(config);
+
+        config.set(path + ".enabled", true);
+        config.set(path + ".lore", "CommonLore");
+        config.set(path + ".material", mainItem.getType().toString());
+        config.set(path + ".displayName", mainItem.hasItemMeta() && mainItem.getItemMeta().hasDisplayName() ? mainItem.getItemMeta().getDisplayName() : mainItem.getType().name());
+        config.set(path + ".enchanted", mainItem.getEnchantments().size() > 0);
+        config.set(path + ".model", builder.getModelData());
+
+        List<Map<String, Object>> requiredList = new ArrayList<>();
+        for (ItemStack item : builder.getRequiredItems()) {
+            requiredList.add(serializeItem(item));
+        }
+        config.set(path + ".requiredItems", requiredList);
+
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (ItemStack item : builder.getResultItems()) {
+            resultList.add(serializeItem(item));
+        }
+        config.set(path + ".resultItems", resultList);
+
+        plugin.saveConfig();
+        return true;
+    }
+
+    private String findNextAvailablePath(FileConfiguration config) {
+        ConfigurationSection itemsSection = config.getConfigurationSection("Items");
+        int targetPage = 1;
+        int targetSlot = 0;
+
+        if (itemsSection == null) return "Items.page1.0";
+
+        Set<String> pageKeys = itemsSection.getKeys(false);
+        if (!pageKeys.isEmpty()) {
+            targetPage = pageKeys.stream().map(key -> key.replace("page", "")).mapToInt(Integer::parseInt).max().orElse(1);
+        }
+
+        ConfigurationSection lastPageSection = itemsSection.getConfigurationSection("page" + targetPage);
+        if (lastPageSection != null) {
+            Set<String> slotKeys = lastPageSection.getKeys(false);
+            if (!slotKeys.isEmpty()) {
+                int maxSlot = slotKeys.stream().mapToInt(Integer::parseInt).max().orElse(-1);
+                if (maxSlot < 44) {
+                    targetSlot = maxSlot + 1;
+                } else {
+                    targetPage++;
+                    targetSlot = 0;
+                }
+            }
+        }
+        return "Items.page" + targetPage + "." + targetSlot;
+    }
+
+    private Map<String, Object> serializeItem(ItemStack item) {
+        Map<String, Object> serialized = new HashMap<>();
+        String mmid = MythicItemUtil.getMythicType(item);
+
+        if (mmid != null) {
+            serialized.put("mmid", mmid);
+        } else {
+            serialized.put("type", item.getType().toString());
+        }
+
+        ItemMeta meta = item.getItemMeta();
+        serialized.put("displayName", meta != null && meta.hasDisplayName() ? meta.getDisplayName() : item.getType().name());
+        serialized.put("amount", item.getAmount());
+
+        return serialized;
+    }
+}

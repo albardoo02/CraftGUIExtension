@@ -1,7 +1,9 @@
 package net.azisaba.life;
 
 import net.azisaba.life.commands.CraftGuiCommand;
+import net.azisaba.life.editor.RecipeEditorManager;
 import net.azisaba.life.gui.GuiManager;
+import net.azisaba.life.listener.EditorListener;
 import net.azisaba.life.listener.GuiClickListener;
 import net.azisaba.life.utils.ConfigUtil;
 import net.azisaba.life.utils.GuiUtil;
@@ -19,6 +21,7 @@ public final class CraftGUIExtension extends JavaPlugin {
     private GuiManager guiManager;
     private MapUtil mapUtil;
     private GuiUtil guiUtil;
+    private RecipeEditorManager manager;
 
     private Map<String, Map<Integer, ItemUtil>> loadedItems;
     private Map<String, List<String>> loadedLores;
@@ -44,6 +47,7 @@ public final class CraftGUIExtension extends JavaPlugin {
 
         this.guiUtil = new GuiUtil(this, configUtil);
         this.mapUtil = new MapUtil();
+        this.manager = new RecipeEditorManager(this);
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
 
@@ -60,8 +64,9 @@ public final class CraftGUIExtension extends JavaPlugin {
 
         configUtil.createLogDirectory();
 
-        this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager));
+        this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, manager));
         this.getServer().getPluginManager().registerEvents(new GuiClickListener(this, mapUtil, guiManager, guiUtil, loadedItems, loadedLores, configUtil), this);
+        getServer().getPluginManager().registerEvents(new EditorListener(manager), this);
     }
 
     private void logConfigSummary() {
