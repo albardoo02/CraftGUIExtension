@@ -48,10 +48,13 @@ public final class CraftGUIExtension extends JavaPlugin {
         this.guiUtil = new GuiUtil(this, configUtil);
         this.mapUtil = new MapUtil();
         this.manager = new RecipeEditorManager(this);
+
+        this.guiManager = new GuiManager(this, mapUtil, guiUtil, configUtil, loadedItems, loadedLores);
+
+        loadPluginData();
+
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
-
-        GuiManager guiManager = new GuiManager(this, mapUtil, guiUtil, loadedItems, loadedLores);
 
         this.totalItems = 0;
         for (Map<Integer, ItemUtil> pageItems : loadedItems.values()) {
@@ -65,8 +68,8 @@ public final class CraftGUIExtension extends JavaPlugin {
         configUtil.createLogDirectory();
 
         this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, manager));
-        this.getServer().getPluginManager().registerEvents(new GuiClickListener(this, mapUtil, guiManager, guiUtil, loadedItems, loadedLores, configUtil), this);
-        getServer().getPluginManager().registerEvents(new EditorListener(manager), this);
+        this.getServer().getPluginManager().registerEvents(new GuiClickListener(guiManager), this);
+        this.getServer().getPluginManager().registerEvents(new EditorListener(manager), this);
     }
 
     private void logConfigSummary() {
@@ -90,9 +93,7 @@ public final class CraftGUIExtension extends JavaPlugin {
         this.loadedItems = configUtil.loadItems();
         this.loadedLores = configUtil.loadLores();
 
-        this.guiUtil = new GuiUtil(this, configUtil);
-        this.mapUtil = new MapUtil();
-        this.guiManager = new GuiManager(this, mapUtil, guiUtil, loadedItems, loadedLores);
+        this.guiManager.updateData(this.loadedItems, this.loadedLores);
 
         this.totalItems = 0;
         for (Map<Integer, ItemUtil> pageItems : loadedItems.values()) {

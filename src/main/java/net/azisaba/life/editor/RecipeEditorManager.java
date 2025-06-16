@@ -44,9 +44,10 @@ public class RecipeEditorManager {
         if (builder != null) {
             ConfigSaver saver = new ConfigSaver(plugin, builder);
             if (saver.save()) {
+                plugin.reloadPluginConfig();
                 player.sendMessage("アイテム設定をconfig.ymlに保存しました");
             } else {
-                player.sendMessage("アイテム設定の保存に失敗しました。");
+                player.sendMessage("アイテム設定の保存に失敗しました");
             }
         }
         player.closeInventory();
