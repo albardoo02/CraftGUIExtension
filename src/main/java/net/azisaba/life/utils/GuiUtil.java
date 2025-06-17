@@ -35,6 +35,8 @@ public class GuiUtil{
         ItemStack item = new ItemStack(itemUtil.getMaterial());
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(itemUtil.getDisplayName());
+
+
         if (itemUtil.getModel() > 0) meta.setCustomModelData(itemUtil.getModel());
         if (itemUtil.isEnchanted()) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
@@ -45,15 +47,13 @@ public class GuiUtil{
         List<String> lore = new ArrayList<>();
         List<String> commonLore = loadedLores.get(itemUtil.getLoreKey());
         if (commonLore != null) lore.addAll(commonLore);
-        lore.add("");
 
-        lore.add(ChatColor.GRAY + "変換に必要素材:");
+        lore.add(ChatColor.GRAY + "変換に必要なアイテム:");
         for (RequiredOrResultItem required : itemUtil.getRequiredItems()) {
             lore.add(ChatColor.WHITE + required.getDisplayName() + ChatColor.GRAY + " x" + required.getAmount());
         }
-        lore.add("");
 
-        lore.add(ChatColor.GRAY + "付与されるアイテム:");
+        lore.add(ChatColor.GRAY + "変換後のアイテム:");
         for (RequiredOrResultItem result : itemUtil.getResultItems()) {
             lore.add(ChatColor.AQUA + result.getDisplayName() + ChatColor.GRAY + " x" + result.getAmount());
         }
@@ -67,44 +67,53 @@ public class GuiUtil{
         ItemMeta meta = staticItem.getItemMeta();
         if (meta == null) return;
 
-        List<String> newLore = new ArrayList<>();
         boolean canCraft = true;
+        List<String> requirementLines = new ArrayList<>();
+        requirementLines.add(ChatColor.GRAY + "変換に必要素材:");
 
-        newLore.add(ChatColor.GRAY + "変換に必要素材:");
         for (RequiredOrResultItem required : itemUtil.getRequiredItems()) {
-            int playerAmount = required.isMythicItem() ? countMythic(player, required.getMmid(), required.getDisplayName()) : countVanilla(player, required.getType());
             int amountNeeded = required.getAmount();
+            int playerAmount = required.isMythicItem() ? countMythic(player, required.getMmid(), required.getDisplayName()) : countVanilla(player, required.getType());
 
-            if (playerAmount < amountNeeded) canCraft = false;
+            if (playerAmount < amountNeeded) {
+                canCraft = false;
+            }
 
             String title = playerAmount >= amountNeeded ? ChatColor.GREEN + "✓ " + ChatColor.RESET : ChatColor.RED + "✘ " + ChatColor.RESET;
             String countMessage = getString(playerAmount, amountNeeded);
 
-            newLore.add(title + required.getDisplayName() + ChatColor.GRAY + " x" + amountNeeded + countMessage);
+            requirementLines.add(title + required.getDisplayName() + ChatColor.GRAY + " x" + amountNeeded + countMessage);
         }
-        newLore.add("");
-        newLore.add(canCraft ? ChatColor.GREEN + "✓ 変換可能です" : ChatColor.RED + "✘ 変換できません");
 
-        List<String> originalLore = meta.getLore();
-        if (originalLore != null) {
-            int startIndex = originalLore.indexOf(ChatColor.GRAY + "変換に必要素材:");
-            if (startIndex != -1) {
-                List<String> finalLore = new ArrayList<>();
-                List<String> commonLore = loadedLores.get(itemUtil.getLoreKey());
-                if (commonLore != null) finalLore.addAll(commonLore);
-                finalLore.add("");
-                finalLore.addAll(newLore);
-                finalLore.add("");
-                finalLore.add(ChatColor.GRAY + "付与されるアイテム:");
-                for (RequiredOrResultItem result : itemUtil.getResultItems()) {
-                    finalLore.add(ChatColor.AQUA + result.getDisplayName() + ChatColor.GRAY + " x" + result.getAmount());
-                }
-                meta.setLore(finalLore);
-            }
+        List<String> finalLore = new ArrayList<>();
+
+
+
+        List<String> commonLore = loadedLores.get(itemUtil.getLoreKey());
+        if (commonLore != null) {
+            finalLore.addAll(commonLore);
         }
+
+        finalLore.add("");
+
+        if (canCraft) {
+            finalLore.add(ChatColor.GREEN + "✓ 変換可能です");
+        } else {
+            finalLore.add(ChatColor.RED + "✘ 変換できません");
+        }
+
+        finalLore.add("");
+        finalLore.addAll(requirementLines);
+        finalLore.add("");
+
+        finalLore.add(ChatColor.GRAY + "付与されるアイテム:");
+        for (RequiredOrResultItem result : itemUtil.getResultItems()) {
+            finalLore.add(ChatColor.AQUA + result.getDisplayName() + ChatColor.GRAY + " x" + result.getAmount());
+        }
+
+        meta.setLore(finalLore);
         staticItem.setItemMeta(meta);
     }
-
     public void setNavigationButtons(Inventory gui, int currentPage) {
         if (currentPage > 1) {
             ItemStack prev = new ItemStack(Material.ARROW);
@@ -135,7 +144,8 @@ public class GuiUtil{
         if (playerAmount >= amount) {
             hasItemMessage = ChatColor.AQUA + " (" + playerAmount + "個所持)";
         } else if (playerAmount > 0) {
-            hasItemMessage = ChatColor.YELLOW + " (" + playerAmount + "/" + amount + "個所持)";
+            int result = amount - playerAmount;
+            hasItemMessage = ChatColor.YELLOW + " (" + result + "個所持)";
         } else {
             hasItemMessage = ChatColor.RED + " (所持していません)";
         }

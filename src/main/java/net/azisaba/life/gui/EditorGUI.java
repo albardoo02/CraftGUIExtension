@@ -24,28 +24,10 @@ public class EditorGUI {
         return item;
     }
 
-    public static void openMainItemGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, "CraftGUI登録 - 表示アイテム設定");
-        ItemStack placeholder = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i = 0; i < gui.getSize(); i++) { gui.setItem(i, placeholder); }
-
-        gui.setItem(13, null);
-        gui.setItem(18, createItem(Material.BARRIER, "§cキャンセル", "§7編集を中止します"));
-        gui.setItem(26, createItem(Material.LIME_WOOL, "§a次へ", "§7必要アイテムの設定に進みます"));
-
-        player.openInventory(gui);
-    }
-
-    public static void openRequiredItemsGUI(Player player, RecipeBuilder builder) {
-        Inventory gui = Bukkit.createInventory(null, 54, "CraftGUI登録 - 要求アイテム設定");
+    public static void openStep1_RequiredItemsGUI(Player player) {
+        Inventory gui = Bukkit.createInventory(null, 54, "CraftGUI登録 - 要求アイテム");
         ItemStack placeholder = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i = 36; i < gui.getSize(); i++) { gui.setItem(i, placeholder); }
-
-        List<ItemStack> requiredItems = builder.getRequiredItems();
-        for (int i = 0; i < requiredItems.size(); i++) {
-            if (i >= 36) break;
-            gui.setItem(i, requiredItems.get(i));
-        }
 
         gui.setItem(45, createItem(Material.BARRIER, "§cキャンセル"));
         gui.setItem(53, createItem(Material.LIME_WOOL, "§a次へ", "§7付与アイテムの設定に進みます"));
@@ -53,43 +35,34 @@ public class EditorGUI {
         player.openInventory(gui);
     }
 
-    public static void openResultItemsGUI(Player player, RecipeBuilder builder) {
-        Inventory gui = Bukkit.createInventory(null, 54, "CraftGUI登録 - 付与アイテム設定");
+    public static void openStep2_ResultItemGUI(Player player) {
+        Inventory gui = Bukkit.createInventory(null, 27, "CraftGUI登録 - 付与アイテム");
         ItemStack placeholder = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i = 36; i < gui.getSize(); i++) { gui.setItem(i, placeholder); }
+        for (int i = 0; i < gui.getSize(); i++) { gui.setItem(i, placeholder); }
 
-        List<ItemStack> resultItems = builder.getResultItems();
-        for (int i = 0; i < resultItems.size(); i++) {
-            if (i >= 36) break;
-            gui.setItem(i, resultItems.get(i));
-        }
-
-        gui.setItem(45, createItem(Material.BARRIER, "§cキャンセル"));
-        gui.setItem(53, createItem(Material.LIME_WOOL, "§a次へ", "§7最終確認に進みます"));
+        gui.setItem(13, null);
+        gui.setItem(18, createItem(Material.BARRIER, "§cキャンセル"));
+        gui.setItem(26, createItem(Material.LIME_WOOL, "§a次へ", "§7最終確認に進みます"));
 
         player.openInventory(gui);
     }
 
-    public static void openConfirmGUI(Player player, RecipeBuilder builder) {
-        Inventory gui = Bukkit.createInventory(null, 54, "CraftGUI登録 - 最終確認");
+    public static void openStep3_ConfirmGUI(Player player, RecipeBuilder builder) {
+        Inventory gui = Bukkit.createInventory(null, 54, "CraftGUI登録 - 登録確認");
         ItemStack placeholder = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i = 0; i < gui.getSize(); i++) { gui.setItem(i, placeholder); }
 
-        gui.setItem(4, builder.getMainItem());
-        gui.setItem(5, createItem(Material.PAPER, "§bモデルデータ: §f" + builder.getModelData()));
+        // 付与アイテム（＝見た目アイテム）を中央に表示
+        if (!builder.getResultItems().isEmpty()) {
+            gui.setItem(4, builder.getResultItems().get(0));
+        }
 
+        // 必要アイテムをリスト表示
         gui.setItem(19, createItem(Material.HOPPER, "§6必要アイテム"));
         int requiredSlot = 20;
         for(ItemStack item : builder.getRequiredItems()) {
             if (requiredSlot > 25) break;
             gui.setItem(requiredSlot++, item);
-        }
-
-        gui.setItem(37, createItem(Material.DISPENSER, "§a付与アイテム"));
-        int resultSlot = 38;
-        for(ItemStack item : builder.getResultItems()) {
-            if (resultSlot > 43) break;
-            gui.setItem(resultSlot++, item);
         }
 
         gui.setItem(45, createItem(Material.BARRIER, "§cキャンセル"));

@@ -25,18 +25,32 @@ public class ConfigSaver {
 
     public boolean save() {
         FileConfiguration config = plugin.getConfig();
-        ItemStack mainItem = builder.getMainItem();
 
-        if (mainItem == null || mainItem.getType().isAir()) return false;
+        if (builder.getResultItems().isEmpty()) {
+            return false;
+        }
 
+        ItemStack mainDisplayItem = builder.getResultItems().get(0);
         String path = findNextAvailablePath(config);
 
         config.set(path + ".enabled", true);
         config.set(path + ".lore", "CommonLore");
-        config.set(path + ".material", mainItem.getType().toString());
-        config.set(path + ".displayName", mainItem.hasItemMeta() && mainItem.getItemMeta().hasDisplayName() ? mainItem.getItemMeta().getDisplayName() : mainItem.getType().name());
-        config.set(path + ".enchanted", mainItem.getEnchantments().size() > 0);
-        config.set(path + ".model", builder.getModelData());
+        config.set(path + ".material", mainDisplayItem.getType().toString());
+
+        ItemMeta meta = mainDisplayItem.getItemMeta();
+        if (meta != null && meta.hasDisplayName()) {
+            config.set(path + ".displayName", meta.getDisplayName());
+        } else {
+            config.set(path + ".displayName", mainDisplayItem.getType().name());
+        }
+
+        config.set(path + ".enchanted", meta != null && meta.hasEnchants());
+
+        if (meta != null && meta.hasCustomModelData()) {
+            config.set(path + ".model", meta.getCustomModelData());
+        } else {
+            config.set(path + ".model", 0);
+        }
 
         List<Map<String, Object>> requiredList = new ArrayList<>();
         for (ItemStack item : builder.getRequiredItems()) {
@@ -59,7 +73,7 @@ public class ConfigSaver {
         int targetPage = 1;
         int targetSlot = 0;
 
-        if (itemsSection == null) return "Items.page1.0";
+        if (itemsSection == null) return "Items.page1";
 
         Set<String> pageKeys = itemsSection.getKeys(false);
         if (!pageKeys.isEmpty()) {

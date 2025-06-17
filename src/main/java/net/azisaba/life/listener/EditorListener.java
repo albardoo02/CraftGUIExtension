@@ -43,47 +43,38 @@ public class EditorListener implements Listener {
 
             switch (step) {
                 case 1:
-                    if (slot == 13) {
-                        event.setCancelled(false);
-                    } else if (slot == 18) {
-                        manager.cancel(player);
-                    } else if (slot == 26) {
-                        ItemStack mainItem = gui.getItem(13);
-                        if (mainItem == null || mainItem.getType().isAir()) {
-                            player.sendMessage(ChatColor.RED + "メインアイテムを設置してください");
-                            return;
-                        }
-                        builder.setMainItem(mainItem.clone());
-                        builder.setModelData(mainItem.hasItemMeta() && mainItem.getItemMeta().hasCustomModelData() ? mainItem.getItemMeta().getCustomModelData() : 0);
-                        manager.nextStep(player);
-                    }
-                    break;
-
-                case 2:
-                case 3:
                     if (slot < 36) {
                         event.setCancelled(false);
                     } else if (slot == 45) {
                         manager.cancel(player);
                     } else if (slot == 53) {
-                        if (step == 2) {
-                            builder.getRequiredItems().clear();
-                            for (int i = 0; i < 36; i++) {
-                                ItemStack item = gui.getItem(i);
-                                if (item != null && !item.getType().isAir()) builder.getRequiredItems().add(item.clone());
-                            }
-                        } else {
-                            builder.getResultItems().clear();
-                            for (int i = 0; i < 36; i++) {
-                                ItemStack item = gui.getItem(i);
-                                if (item != null && !item.getType().isAir()) builder.getResultItems().add(item.clone());
+                        builder.getRequiredItems().clear();
+                        for (int i = 0; i < 36; i++) {
+                            ItemStack item = gui.getItem(i);
+                            if (item != null && !item.getType().isAir()) {
+                                builder.getRequiredItems().add(item.clone());
                             }
                         }
                         manager.nextStep(player);
                     }
                     break;
-
-                case 4:
+                case 2:
+                    if (slot == 13) {
+                        event.setCancelled(false);
+                    } else if (slot == 18) {
+                        manager.cancel(player);
+                    } else if (slot == 26) {
+                        ItemStack resultItem = gui.getItem(13);
+                        if (resultItem == null || resultItem.getType().isAir()) {
+                            player.sendMessage(ChatColor.RED + "付与アイテムを設置してください");
+                            return;
+                        }
+                        builder.getResultItems().clear();
+                        builder.getResultItems().add(resultItem.clone());
+                        manager.nextStep(player);
+                    }
+                    break;
+                case 3:
                     if (slot == 45) manager.cancel(player);
                     if (slot == 53) manager.save(player);
                     break;

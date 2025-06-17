@@ -2,7 +2,12 @@ package net.azisaba.life.editor;
 
 import net.azisaba.life.CraftGUIExtension;
 import net.azisaba.life.gui.EditorGUI;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
@@ -20,7 +25,7 @@ public class RecipeEditorManager {
     public void start(Player player) {
         builders.put(player.getUniqueId(), new RecipeBuilder());
         playerSteps.put(player.getUniqueId(), 1);
-        EditorGUI.openMainItemGUI(player);
+        EditorGUI.openStep1_RequiredItemsGUI(player);
     }
 
     public void nextStep(Player player) {
@@ -29,15 +34,16 @@ public class RecipeEditorManager {
         if (currentStep == 0) return;
 
         playerSteps.put(player.getUniqueId(), currentStep + 1);
-        RecipeBuilder builder = getBuilder(player);
 
         switch (currentStep) {
-            case 1: EditorGUI.openRequiredItemsGUI(player, builder); break;
-            case 2: EditorGUI.openResultItemsGUI(player, builder); break;
-            case 3: EditorGUI.openConfirmGUI(player, builder); break;
+            case 1:
+                EditorGUI.openStep2_ResultItemGUI(player);
+                break;
+            case 2:
+                EditorGUI.openStep3_ConfirmGUI(player, getBuilder(player));
+                break;
         }
     }
-
     public void save(Player player) {
         setIntentionalClosure(player);
         RecipeBuilder builder = getBuilder(player);
@@ -45,9 +51,9 @@ public class RecipeEditorManager {
             ConfigSaver saver = new ConfigSaver(plugin, builder);
             if (saver.save()) {
                 plugin.reloadPluginConfig();
-                player.sendMessage("アイテム設定をconfig.ymlに保存しました");
+                player.sendMessage(ChatColor.GREEN + "アイテム設定をconfig.ymlに保存しました");
             } else {
-                player.sendMessage("アイテム設定の保存に失敗しました");
+                player.sendMessage(ChatColor.RED + "アイテム設定の保存に失敗しました．付与アイテムが設定されているか確認してください．");
             }
         }
         player.closeInventory();
@@ -56,6 +62,38 @@ public class RecipeEditorManager {
 
     public void cancel(Player player) {
         setIntentionalClosure(player);
+
+        List<ItemStack> itemsToReturn = new ArrayList<>();
+        RecipeBuilder builder = getBuilder(player);
+
+        if (builder != null) {
+            itemsToReturn.addAll(builder.getRequiredItems());
+            itemsToReturn.addAll(builder.getResultItems());
+        }
+
+        InventoryView openInventoryView = player.getOpenInventory();
+        if (openInventoryView.getTitle().startsWith("CraftGUI登録")) {
+            Inventory currentGui = openInventoryView.getTopInventory();
+            for (ItemStack item : currentGui.getContents()) {
+                if (item != null && !item.getType().isAir()) {
+                    if (item.getType() != Material.ARROW && item.getType() != Material.BARRIER && !item.getType().name().contains("STAINED_GLASS_PANE")) {
+                        itemsToReturn.add(item);
+                    }
+                }
+            }
+        }
+
+        if (!itemsToReturn.isEmpty()) {
+            Collection<ItemStack> leftoverItems = player.getInventory().addItem(itemsToReturn.toArray(new ItemStack[0])).values();
+
+            if (!leftoverItems.isEmpty()) {
+                player.sendMessage(ChatColor.YELLOW + "インベントリに空きがないため，一部のアイテムを足元にドロップしました．");
+                for (ItemStack leftover : leftoverItems) {
+                    player.getWorld().dropItem(player.getLocation(), leftover);
+                }
+            }
+        }
+
         builders.remove(player.getUniqueId());
         playerSteps.remove(player.getUniqueId());
         player.closeInventory();
