@@ -29,8 +29,6 @@ public final class CraftGUIExtension extends JavaPlugin {
     private int errorItems;
     private List<String> errorDetails;
 
-    private static boolean enabled = false;
-
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
@@ -68,6 +66,7 @@ public final class CraftGUIExtension extends JavaPlugin {
         configUtil.createLogDirectory();
 
         this.getCommand("craftgui").setExecutor(new CraftGuiCommand(this, mapUtil, guiManager, manager));
+        this.getCommand("craftgui").setTabCompleter(new CraftGuiCommand(this, mapUtil, guiManager, manager));
         this.getServer().getPluginManager().registerEvents(new GuiClickListener(guiManager), this);
         this.getServer().getPluginManager().registerEvents(new EditorListener(manager), this);
     }

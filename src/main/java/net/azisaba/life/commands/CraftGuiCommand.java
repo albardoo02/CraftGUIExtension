@@ -4,13 +4,22 @@ import net.azisaba.life.CraftGUIExtension;
 import net.azisaba.life.editor.RecipeEditorManager;
 import net.azisaba.life.gui.GuiManager;
 import net.azisaba.life.utils.MapUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
-public class CraftGuiCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class CraftGuiCommand implements CommandExecutor, TabCompleter {
 
     private final CraftGUIExtension plugin;
     private final MapUtil mapUtil;
@@ -59,5 +68,20 @@ public class CraftGuiCommand implements CommandExecutor {
             }
         }
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            List<String> completions = new ArrayList<>();
+            if (sender.hasPermission("craftguiextension.reload")) {
+                completions.add("reload");
+            }
+            if (sender.hasPermission("craftguiextension.register")) {
+                completions.add("register");
+            }
+            return StringUtil.copyPartialMatches(args[0], completions, new ArrayList<>());
+        }
+        return Collections.emptyList();
     }
 }

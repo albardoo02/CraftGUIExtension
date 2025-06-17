@@ -13,10 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GuiManager implements Listener {
@@ -26,150 +23,71 @@ public class GuiManager implements Listener {
     private final GuiUtil guiUtil;
     private final ConfigUtil configUtil;
     private Map<String, Map<Integer, ItemUtil>> loadedItems;
+    private final Map<Integer, Inventory> guiCache = new HashMap<>();
     private Map<String, List<String>> loadedLores;
 
-    public GuiManager(CraftGUIExtension plugin, MapUtil mapUtil, GuiUtil guiUtil, ConfigUtil configUtil, Map<String, Map<Integer, ItemUtil>> loadedItems, Map<String, List<String>> loadedLores) {
+    public GuiManager(CraftGUIExtension plugin, MapUtil mapUtil, GuiUtil guiUtil, ConfigUtil configUtil, Map<String, Map<Integer, ItemUtil>> loadedItems, Map<String, List<String>> newLores) {
         this.plugin = plugin;
         this.mapUtil = mapUtil;
         this.guiUtil = guiUtil;
         this.configUtil = configUtil;
         this.loadedItems = loadedItems;
-        this.loadedLores = loadedLores;
+        this.loadedLores = newLores;
     }
-
     public void updateData(Map<String, Map<Integer, ItemUtil>> newItems, Map<String, List<String>> newLores) {
         this.loadedItems = newItems;
         this.loadedLores = newLores;
-        plugin.getLogger().info("GuiManagerのデータが更新されました");
+        buildCache();
+        plugin.getLogger().info("GuiManagerのデータとキャッシュが更新されました");
+    }
+
+    private void buildCache() {
+        guiCache.clear();
+        if (loadedItems == null) return;
+
+        for (String pageKey : loadedItems.keySet()) {
+            int pageNum = Integer.parseInt(pageKey.replace("page", ""));
+            Inventory staticGui = Bukkit.createInventory(null, 54, "CraftGUI Extension - Page" + pageNum);
+
+            Map<Integer, ItemUtil> pageItems = loadedItems.get(pageKey);
+            for (Map.Entry<Integer, ItemUtil> entry : pageItems.entrySet()) {
+                if (entry.getValue().isEnabled()) {
+                    staticGui.setItem(entry.getKey(), guiUtil.createStaticDisplayItem(entry.getValue()));
+                }
+            }
+
+            guiUtil.setNavigationButtons(staticGui, pageNum);
+
+            guiCache.put(pageNum, staticGui);
+        }
     }
 
     public void openCraftGUI(Player player, int page) {
-        Inventory inv = Bukkit.createInventory(null, 54, "CraftGUI Extension - Page" + page);
-
-        Map<Integer, ItemUtil> pageItems = loadedItems.get("page" + page);
-
-        if (pageItems == null || pageItems.isEmpty()) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cページ" + page + "は存在しないか、アイテムが設定されていません。"));
-            player.closeInventory();
+        Inventory staticGui = guiCache.get(page);
+        if (staticGui == null) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cページ" + page + "は存在しません。"));
             return;
         }
 
-        for (Map.Entry<Integer, ItemUtil> entry : pageItems.entrySet()) {
-            int slot = entry.getKey();
-            ItemUtil itemUtil = entry.getValue();
+        String title = "CraftGUI Extension - Page" + page;
+        Inventory playerGui = Bukkit.createInventory(null, staticGui.getSize(), title);
+        playerGui.setContents(staticGui.getContents());
 
-            if (!itemUtil.isEnabled()) {
-                continue;
+        Map<Integer, ItemUtil> pageItems = loadedItems.get("page" + page);
+        if (pageItems != null) {
+            for (Map.Entry<Integer, ItemUtil> entry : pageItems.entrySet()) {
+                int slot = entry.getKey();
+                ItemUtil itemUtil = entry.getValue();
+                ItemStack currentItem = playerGui.getItem(slot);
+
+                if (currentItem != null && itemUtil.isEnabled()) {
+                    guiUtil.updateLoreForPlayer(currentItem, itemUtil, player);
+                }
             }
-
-            if (slot >= 0 && slot <= 44) {
-                ItemStack item = new ItemStack(itemUtil.getMaterial());
-                ItemMeta meta = item.getItemMeta();
-
-                meta.setDisplayName(itemUtil.getDisplayName());
-
-                List<String> lore = loadedLores.get(itemUtil.getLoreKey());
-                List<String> combinedLore = new ArrayList<>();
-                if (lore != null) {
-                    combinedLore.addAll(lore);
-                }
-
-                List<String> requirementLore = new ArrayList<>();
-                requirementLore.add(ChatColor.GRAY + "変換に必要素材:");
-
-                boolean canCraft = true;
-
-                for (RequiredOrResultItem requiredItem : itemUtil.getRequiredItems()) {
-                    String requiredDisplay = requiredItem.getDisplayName();
-                    int amount = requiredItem.getAmount();
-
-                    int playerAmount = 0;
-                    if (requiredItem.isMythicItem()) {
-                        playerAmount = guiUtil.countMythic(player, requiredItem.getMmid(), requiredItem.getDisplayName());
-                    } else if (requiredItem.getType() != null) {
-                        playerAmount = guiUtil.countVanilla(player, requiredItem.getType());
-                    }
-
-                    String title = playerAmount >= amount ? ChatColor.GREEN + "✓ " + ChatColor.RESET: ChatColor.RED + "✘ " + ChatColor.RESET;
-                    ChatColor color = playerAmount >= amount ? ChatColor.GREEN : ChatColor.RED;
-
-                    String hasItemMessage = getString(playerAmount, amount);
-
-                    requirementLore.add(title + ChatColor.translateAlternateColorCodes('&', requiredDisplay)
-                            + color + " x" + amount + hasItemMessage
-                            + (requiredItem.isMythicItem() ? ChatColor.DARK_GRAY + " (Mythic)" : ChatColor.DARK_GRAY + " (Vanilla)"));
-
-                    if (playerAmount < amount) {
-                        canCraft = false;
-                    }
-                }
-                combinedLore.addAll(requirementLore);
-                combinedLore.add("");
-                if (canCraft) {
-                    combinedLore.add(ChatColor.GREEN + "✓ 変換可能です");
-                } else {
-                    combinedLore.add(ChatColor.RED + "✘ 変換できません");
-                }
-
-                meta.setLore(combinedLore);
-
-                if (itemUtil.isEnchanted()) {
-                    meta.addEnchant(Enchantment.DURABILITY, 1, true);
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                }
-
-                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-
-                if (itemUtil.getModel() > 0) {
-                    meta.setCustomModelData(itemUtil.getModel());
-                }
-
-                item.setItemMeta(meta);
-                inv.setItem(slot, item);
-            } else if (slot >= 45 && slot <= 53) {
-                plugin.getLogger().warning("ページ" + page + "のスロット" + slot + "はメニュー専用スロットです．config.ymlから除外してください．");
-            }
-
-            int maxPage = guiUtil.getMaxPage();
-
-            if (page > 1) {
-                ItemStack prev = new ItemStack(Material.ARROW);
-                ItemMeta meta = prev.getItemMeta();
-                meta.setDisplayName(ChatColor.YELLOW + "戻る");
-                prev.setItemMeta(meta);
-                inv.setItem(45, prev);
-            }
-
-            if (page < maxPage) {
-                ItemStack next = new ItemStack(Material.ARROW);
-                ItemMeta meta = next.getItemMeta();
-                meta.setDisplayName(ChatColor.GREEN + "次へ");
-                next.setItemMeta(meta);
-                inv.setItem(53, next);
-            }
-
-            ItemStack close = new ItemStack(Material.BARRIER);
-            ItemMeta closeMeta = close.getItemMeta();
-            closeMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&',"&c&l閉じる"));
-            closeMeta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&', "&7クリックで閉じる")));
-            close.setItemMeta(closeMeta);
-            inv.setItem(49, close);
-
-            this.mapUtil.setPlayerPage(player.getUniqueId(), page);
-            player.openInventory(inv);
         }
-    }
 
-    private static String getString(int playerAmount, int amount) {
-        String hasItemMessage;
-        if (playerAmount >= amount) {
-            hasItemMessage = ChatColor.AQUA + " (" + playerAmount + "個所持)";
-        } else if (playerAmount > 0) {
-            hasItemMessage = ChatColor.YELLOW + " (" + playerAmount + "/" + amount + "個所持)";
-        } else {
-            hasItemMessage = ChatColor.RED + " (所持していません)";
-        }
-        return hasItemMessage;
+        this.mapUtil.setPlayerPage(player.getUniqueId(), page);
+        player.openInventory(playerGui);
     }
 
     public void handleGuiClick(InventoryClickEvent event) {
