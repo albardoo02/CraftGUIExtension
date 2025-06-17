@@ -23,8 +23,8 @@ public class GuiManager implements Listener {
     private final GuiUtil guiUtil;
     private final ConfigUtil configUtil;
     private Map<String, Map<Integer, ItemUtil>> loadedItems;
-    private final Map<Integer, Inventory> guiCache = new HashMap<>();
     private Map<String, List<String>> loadedLores;
+    private final Map<Integer, Inventory> guiCache = new HashMap<>();
 
     public GuiManager(CraftGUIExtension plugin, MapUtil mapUtil, GuiUtil guiUtil, ConfigUtil configUtil, Map<String, Map<Integer, ItemUtil>> loadedItems, Map<String, List<String>> newLores) {
         this.plugin = plugin;
@@ -47,7 +47,7 @@ public class GuiManager implements Listener {
 
         for (String pageKey : loadedItems.keySet()) {
             int pageNum = Integer.parseInt(pageKey.replace("page", ""));
-            Inventory staticGui = Bukkit.createInventory(null, 54, "CraftGUI Extension - Page" + pageNum);
+            Inventory staticGui = Bukkit.createInventory(null, 54, "CraftGUI Extension - ページ" + pageNum);
 
             Map<Integer, ItemUtil> pageItems = loadedItems.get(pageKey);
             for (Map.Entry<Integer, ItemUtil> entry : pageItems.entrySet()) {
@@ -57,7 +57,6 @@ public class GuiManager implements Listener {
             }
 
             guiUtil.setNavigationButtons(staticGui, pageNum);
-
             guiCache.put(pageNum, staticGui);
         }
     }
@@ -205,7 +204,6 @@ public class GuiManager implements Listener {
             int amountNeededPerCraft = requiredItem.getAmount();
 
             if (amountNeededPerCraft <= 0) {
-                plugin.getLogger().warning("Required item " + requiredItem.getDisplayName() + " has amount <= 0. Skipping for craftability check.");
                 continue;
             }
             int playerAmount = 0;

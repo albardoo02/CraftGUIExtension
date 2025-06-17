@@ -68,7 +68,11 @@ Lores:
 ```
 
 ## 使い方
-- `//rgui`：CraftGUI Extensionを開きます
+- `/craftgui`：CraftGUI Extensionを開きます
+
+- `/craftgui register`：アイテム登録GUIを開きます
+
+- `/craftgui reload`：config.ymlを再読込します
 
 ## ライセンス / License
 [GNU General Public License v3.0](LICENSE)

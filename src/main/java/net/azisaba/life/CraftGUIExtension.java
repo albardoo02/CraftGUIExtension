@@ -10,8 +10,10 @@ import net.azisaba.life.utils.GuiUtil;
 import net.azisaba.life.utils.ItemUtil;
 import net.azisaba.life.utils.MapUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +33,21 @@ public final class CraftGUIExtension extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        PluginManager pluginManager = getServer().getPluginManager();
+        List<String> requiredPlugins = Arrays.asList("ItemStash", "MMLuck");
+
+        for (String pluginName : requiredPlugins) {
+            if (!pluginManager.isPluginEnabled(pluginName)) {
+                getLogger().severe("-------------------------------------------------");
+                getLogger().severe(String.format("必須プラグイン(%s)が見つかりません！", pluginName));
+                getLogger().severe("プラグインを無効化します");
+                getLogger().severe("-------------------------------------------------");
+
+                pluginManager.disablePlugin(this);
+                return;
+            }
+        }
+        this.getLogger().info("必須プラグインの読み込みを確認しました");
         this.saveDefaultConfig();
 
         this.configUtil = new ConfigUtil(this);
@@ -83,7 +100,7 @@ public final class CraftGUIExtension extends JavaPlugin {
                 getLogger().warning("  - " + error);
             }
         } else {
-            getLogger().info("読み込みエラーが発生したエラーはありませんでした");
+            getLogger().info("読み込みエラーはありませんでした");
         }
         getLogger().info("-------------------------------------------------");
     }

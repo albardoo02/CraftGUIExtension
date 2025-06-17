@@ -115,7 +115,6 @@ public class ConfigUtil {
             Map<String, Object> itemMap = (Map<String, Object>) obj;
 
             try {
-                // boolean isMythicItem = (boolean) itemMap.getOrDefault("isMythicItem", false);
                 String mmid = (String) itemMap.get("mmid");
                 String typeStr = (String) itemMap.get("type");
 

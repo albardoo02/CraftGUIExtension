@@ -98,16 +98,19 @@ public class ConfigSaver {
 
     private Map<String, Object> serializeItem(ItemStack item) {
         Map<String, Object> serialized = new HashMap<>();
-        String mmid = MythicItemUtil.getMythicType(item);
+        ItemMeta meta = item.getItemMeta();
 
-        if (mmid != null) {
+        String mmid = MythicItemUtil.getMythicType(item);
+        boolean hasDisplayName = meta != null && meta.hasDisplayName();
+
+        if (hasDisplayName) {
             serialized.put("mmid", mmid);
+
         } else {
             serialized.put("type", item.getType().toString());
         }
 
-        ItemMeta meta = item.getItemMeta();
-        serialized.put("displayName", meta != null && meta.hasDisplayName() ? meta.getDisplayName() : item.getType().name());
+        serialized.put("displayName", hasDisplayName ? meta.getDisplayName() : item.getType().name());
         serialized.put("amount", item.getAmount());
 
         return serialized;

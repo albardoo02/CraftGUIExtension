@@ -145,7 +145,7 @@ public class GuiUtil{
             hasItemMessage = ChatColor.AQUA + " (" + playerAmount + "個所持)";
         } else if (playerAmount > 0) {
             int result = amount - playerAmount;
-            hasItemMessage = ChatColor.YELLOW + " (" + result + "個所持)";
+            hasItemMessage = ChatColor.YELLOW + " (" + result + "個不足しています)";
         } else {
             hasItemMessage = ChatColor.RED + " (所持していません)";
         }

@@ -52,13 +52,11 @@ public class EditorGUI {
         ItemStack placeholder = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i = 0; i < gui.getSize(); i++) { gui.setItem(i, placeholder); }
 
-        // 付与アイテム（＝見た目アイテム）を中央に表示
         if (!builder.getResultItems().isEmpty()) {
             gui.setItem(4, builder.getResultItems().get(0));
         }
 
-        // 必要アイテムをリスト表示
-        gui.setItem(19, createItem(Material.HOPPER, "§6必要アイテム"));
+        gui.setItem(19, createItem(Material.HOPPER, "§6要求アイテム"));
         int requiredSlot = 20;
         for(ItemStack item : builder.getRequiredItems()) {
             if (requiredSlot > 25) break;
