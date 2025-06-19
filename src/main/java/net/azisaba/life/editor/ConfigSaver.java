@@ -7,11 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ConfigSaver {
 
@@ -52,20 +48,45 @@ public class ConfigSaver {
             config.set(path + ".model", 0);
         }
 
+        List<ItemStack> aggregatedRequired = aggregateItems(builder.getRequiredItems());
         List<Map<String, Object>> requiredList = new ArrayList<>();
-        for (ItemStack item : builder.getRequiredItems()) {
+        for (ItemStack item : aggregatedRequired) {
             requiredList.add(serializeItem(item));
         }
         config.set(path + ".requiredItems", requiredList);
 
+        List<ItemStack> aggregatedResult = aggregateItems(builder.getResultItems());
         List<Map<String, Object>> resultList = new ArrayList<>();
-        for (ItemStack item : builder.getResultItems()) {
+        for (ItemStack item : aggregatedResult) {
             resultList.add(serializeItem(item));
         }
         config.set(path + ".resultItems", resultList);
 
         plugin.saveConfig();
         return true;
+    }
+
+    private List<ItemStack> aggregateItems(List<ItemStack> items) {
+        if (items == null || items.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<ItemStack, Integer> aggregatedMap = new LinkedHashMap<>();
+        for (ItemStack item : items) {
+            if (item == null || item.getType().isAir()) continue;
+            ItemStack key = item.clone();
+            key.setAmount(1);
+            aggregatedMap.put(key, aggregatedMap.getOrDefault(key, 0) + item.getAmount());
+        }
+
+        List<ItemStack> finalItems = new ArrayList<>();
+        for (Map.Entry<ItemStack, Integer> entry : aggregatedMap.entrySet()) {
+            ItemStack finalItem = entry.getKey().clone();
+            finalItem.setAmount(entry.getValue());
+            finalItems.add(finalItem);
+        }
+
+        return finalItems;
     }
 
     private String findNextAvailablePath(FileConfiguration config) {

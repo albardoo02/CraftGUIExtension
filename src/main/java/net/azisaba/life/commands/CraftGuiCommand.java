@@ -4,7 +4,6 @@ import net.azisaba.life.CraftGUIExtension;
 import net.azisaba.life.editor.RecipeEditorManager;
 import net.azisaba.life.gui.GuiManager;
 import net.azisaba.life.utils.MapUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,10 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CraftGuiCommand implements CommandExecutor, TabCompleter {
 

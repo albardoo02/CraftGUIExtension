@@ -69,7 +69,7 @@ public class GuiUtil{
 
         boolean canCraft = true;
         List<String> requirementLines = new ArrayList<>();
-        requirementLines.add(ChatColor.GRAY + "変換に必要素材:");
+        requirementLines.add(ChatColor.GRAY + "変換に必要なアイテム:");
 
         for (RequiredOrResultItem required : itemUtil.getRequiredItems()) {
             int amountNeeded = required.getAmount();
@@ -106,7 +106,7 @@ public class GuiUtil{
         finalLore.addAll(requirementLines);
         finalLore.add("");
 
-        finalLore.add(ChatColor.GRAY + "付与されるアイテム:");
+        finalLore.add(ChatColor.GRAY + "変換後のアイテム:");
         for (RequiredOrResultItem result : itemUtil.getResultItems()) {
             finalLore.add(ChatColor.AQUA + result.getDisplayName() + ChatColor.GRAY + " x" + result.getAmount());
         }
